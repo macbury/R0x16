@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -38,13 +40,21 @@ public class CodeEditor extends Widget {
   CodeEditorStyle style;
   private final static int GUTTER_PADDING = 10;
   private static final String TAG = "CodeEditor";
+  private static final float LINE_PADDING = 2;
   private final Rectangle fieldBounds = new Rectangle();
   private final TextBounds textBounds = new TextBounds();
   private ArrayList<Line> lines;
   boolean disabled;
   private String text = "";
-  private int lineY = 0;
+  private int rowScrollPosition = 0;
+  private int row = 0;
+  private int col = 0;
   private HashMap<JavaScriptScanner.Kind, Color> styles;
+  private float blinkTime = 0.32f;
+  private long lastBlink;
+  private boolean cursorOn;
+  private Clipboard clipboard;
+  private ClickListener inputListener;
   public CodeEditor(Skin skin) {
     style  = skin.get(CodeEditorStyle.class);
     lines  = new ArrayList<Line>();
@@ -54,10 +64,78 @@ public class CodeEditor extends Widget {
     styles.put(JavaScriptScanner.Kind.STRING, new Color(143.0f/255.0f, 157.0f/255.0f, 106.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.COMMENT, new Color(95.0f/255.0f, 90.0f/255.0f, 96.0f/255.0f, 1.0f));
     shape = new ShapeRenderer();
+    
+    this.clipboard = Gdx.app.getClipboard();
+    setWidth(getPrefWidth());
+    setHeight(getPrefHeight());
+    
+    initializeKeyboard();
   }
   
+  private void initializeKeyboard() {
+    addListener(inputListener = new ClickListener() {
+      public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+        if (!super.touchDown(event, x, y, pointer, button)) return false;
+        if (pointer == 0 && button != 0) return false;
+        if (disabled) return true;
+        clearSelection();
+        setCursorPosition(xToCol(x), yToRow(y));
+        //selectionStart = cursor;
+        Stage stage = getStage();
+        if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
+        return true;
+      }
+    });
+  }
+  
+  protected int xToCol(float x) {
+    int c = (int) Math.floor((x - gutterWidth() - GUTTER_PADDING) / getFont().getSpaceWidth());
+    if (c < 0) {
+      c = 0;
+    }
+    return c;
+  }
+  
+  protected int yToRow(float y) {
+    int r = (int) Math.floor((getHeight() - y) / getLineHeight());
+    if (r < 0) {
+      r = 0;
+    }
+    return r;
+  }
+  
+  protected void setCursorPosition(int x, int y) {
+    Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y);
+    Line line = getLineForRow(y);
+    
+    if (line == null) {
+      row = (this.lines.size() - 1);
+      line = this.getLineForRow(row);
+    } else {
+      row = y;
+    }
+    
+    col = x;
+    if (col > line.textLenght()) {
+      col = line.textLenght();
+    }
+  }
+
+  private Line getLineForRow(int y) {
+    try {
+      return lines.get(y);
+    } catch (IndexOutOfBoundsException e) {
+      return null;
+    }
+  }
+
+  protected void clearSelection() {
+    row = 0;
+    col = 0;
+  }
+
   public float getLineHeight() {
-    return style.font.getLineHeight();
+    return getFont().getLineHeight() + LINE_PADDING;
   }
   
   private int gutterWidth() {
@@ -75,7 +153,7 @@ public class CodeEditor extends Widget {
     Stage stage     = getStage();
     boolean focused = stage != null && stage.getKeyboardFocus() == this;
     
-    final BitmapFont font = ResourceManager.shared().getFont("CURRIER_NEW");
+    final BitmapFont font = getFont();
     final Drawable selection = style.selection;
     final Drawable cursorPatch = style.cursor;
 
@@ -98,10 +176,20 @@ public class CodeEditor extends Widget {
     shape.filledRect(sx, sy, gutterWidth() + GUTTER_PADDING / 2 , height);
     shape.end();
     
+    if (focused) {
+      Gdx.gl.glEnable(GL10.GL_BLEND);
+      Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
+      shape.begin(ShapeType.FilledRectangle);
+      shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
+      shape.filledRect(sx, (sy + height) - (row + 1) * getLineHeight(), width, getLineHeight());
+      shape.end();
+      Gdx.gl.glDisable(GL10.GL_BLEND);
+    }
+    
     renderBatch.begin();
     renderBatch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
     
-    int fromLine = lineY;
+    int fromLine = rowScrollPosition;
     int toLine   = Math.min(fromLine + visibleLinesCount(), this.lines.size());
     
     for (int y = fromLine; y < toLine; y++) {
@@ -122,8 +210,27 @@ public class CodeEditor extends Widget {
         lineElementX += bounds.width;
       }
     }
+    
+    if (focused && !disabled) {
+      blink();
+      if (cursorOn && cursorPatch != null) {
+        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + (col * getFont().getSpaceWidth()), (sy + height) - (row + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
+      }
+    }
   }
   
+  private BitmapFont getFont() {
+    return ResourceManager.shared().getFont("CURRIER_NEW");
+  }
+
+  private void blink() {
+    long time = TimeUtils.nanoTime();
+    if ((time - lastBlink) / 1000000000.0f > blinkTime) {
+      cursorOn = !cursorOn;
+      lastBlink = time;
+    }
+  }
+
   static public class CodeEditorStyle {
     public BitmapFont font;
     public Color fontColor, focusedFontColor, disabledFontColor;
@@ -174,12 +281,12 @@ public class CodeEditor extends Widget {
     this.lines.add(line);
     while((kind=js.scan()) != JavaScriptScanner.Kind.EOF) {
       if(kind == JavaScriptScanner.Kind.NEWLINE) {
-        Gdx.app.log(TAG, kind.toString());
+        //Gdx.app.log(TAG, kind.toString());
         line = new Line();
         this.lines.add(line);
       } else {
         line.add(new Element(kind, js.getString()));
-        Gdx.app.log(TAG, js.getString());
+        //Gdx.app.log(TAG, js.getString());
       }
     }
     
