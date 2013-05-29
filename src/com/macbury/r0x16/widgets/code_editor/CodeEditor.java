@@ -3,6 +3,8 @@ package com.macbury.r0x16.widgets.code_editor;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.lwjgl.input.Mouse;
+
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.Gdx;
@@ -45,16 +47,23 @@ public class CodeEditor extends Widget {
   private final TextBounds textBounds = new TextBounds();
   private ArrayList<Line> lines;
   boolean disabled;
-  private String text = "";
+  private String text           = "";
   private int rowScrollPosition = 0;
-  private int row = 0;
-  private int col = 0;
+  private int row               = 0;
+  private int col               = 0;
+  private float blinkTime       = 0.32f;
+  private int selectionStartRow = -1;
+  private int selectionStartCol = -1;
+  private int selectionEndRow   = -1;
+  private int selectionEndCol   = -1;
+  
   private HashMap<JavaScriptScanner.Kind, Color> styles;
-  private float blinkTime = 0.32f;
+  
   private long lastBlink;
   private boolean cursorOn;
   private Clipboard clipboard;
   private ClickListener inputListener;
+  private boolean hasSelection;
   public CodeEditor(Skin skin) {
     style  = skin.get(CodeEditorStyle.class);
     lines  = new ArrayList<Line>();
@@ -85,9 +94,93 @@ public class CodeEditor extends Widget {
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
         return true;
       }
+      
+      public boolean keyDown(InputEvent event, int keycode) {
+        return onKeyDown(event, keycode);
+      }
     });
   }
   
+  protected boolean onKeyDown(InputEvent event, int keycode) {
+    if (disabled) return false;
+    
+    final BitmapFont font = getFont();
+
+    lastBlink = 0;
+    cursorOn = false;
+    Stage stage = getStage();
+    if (stage != null && stage.getKeyboardFocus() == this) {
+      boolean repeat = false;
+      boolean ctrl   = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
+      
+      if (ctrl) {
+        if (keycode == Keys.V) {
+          paste();
+          return true;
+        }
+        if (keycode == Keys.C || keycode == Keys.INSERT) {
+          copy();
+          return true;
+        }
+        if (keycode == Keys.X || keycode == Keys.DEL) {
+          cut();
+          return true;
+        }
+      } 
+      
+      if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)) { 
+        if (keycode == Keys.INSERT) {
+          paste();
+        }          
+        if (keycode == Keys.FORWARD_DEL) {
+          if (hasSelection) {
+            copy();
+            delete();
+          }
+        }
+        
+        if (keycode == Keys.LEFT) {
+          if (!hasSelection) {
+            //selectionStart = cursor;
+            hasSelection = true;
+          }
+          while (--col > 0 && ctrl) {
+            char c = text.charAt(col);
+            if (c >= 'A' && c <= 'Z') continue;
+            if (c >= 'a' && c <= 'z') continue;
+            if (c >= '0' && c <= '9') continue;
+            break;
+          }
+          repeat = true;
+        }
+      }
+      
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  private void delete() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  private void cut() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  private void copy() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  private void paste() {
+    // TODO Auto-generated method stub
+    
+  }
+
   protected int xToCol(float x) {
     int c = (int) Math.floor((x - gutterWidth() - GUTTER_PADDING) / getFont().getSpaceWidth());
     if (c < 0) {
@@ -144,6 +237,24 @@ public class CodeEditor extends Widget {
   
   private int visibleLinesCount() {
     return (int) (this.getHeight() / getLineHeight());
+  }
+  
+  private int getCaretPositionFor(int r, int c) {
+    Line line = getLineForRow(r);
+    if (line == null) {
+      return 0;
+    } else {
+      int width = c;
+      for (int y = 0; y < r; y++) {
+        line = getLineForRow(y);
+        width += line.textLenght();
+      }
+      return width;
+    }
+  }
+  
+  private int getCaretPosition() {
+    return getCaretPositionFor(row, col);
   }
   
   @Override
