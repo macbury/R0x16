@@ -33,6 +33,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
+import com.macbury.r0x16.Core;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.widgets.JavaScriptScanner;
 import com.macbury.r0x16.widgets.JavaScriptScanner.Kind;
@@ -68,9 +69,9 @@ public class CodeEditor extends Widget {
     style  = skin.get(CodeEditorStyle.class);
     lines  = new ArrayList<Line>();
     styles = new HashMap<JavaScriptScanner.Kind, Color>();
-    styles.put(JavaScriptScanner.Kind.KEYWORD, new Color(205.0f/255.0f, 168.0f/255.0f, 105.0f/255.0f, 1.0f));
+    styles.put(JavaScriptScanner.Kind.KEYWORD, new Color(252.0f/255.0f, 128.0f/255.0f, 58.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.NORMAL, Color.WHITE);
-    styles.put(JavaScriptScanner.Kind.STRING, new Color(143.0f/255.0f, 157.0f/255.0f, 106.0f/255.0f, 1.0f));
+    styles.put(JavaScriptScanner.Kind.STRING, new Color(142.0f/255.0f, 198.0f/255.0f, 95.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.COMMENT, new Color(95.0f/255.0f, 90.0f/255.0f, 96.0f/255.0f, 1.0f));
     shape = new ShapeRenderer();
     
@@ -83,6 +84,23 @@ public class CodeEditor extends Widget {
   
   private void initializeKeyboard() {
     addListener(inputListener = new ClickListener() {
+
+      @Override
+      public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+        super.enter(event, x, y, pointer, fromActor);
+        if (pointer == -1) {
+          Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
+        }
+      }
+
+      @Override
+      public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+        super.exit(event, x, y, pointer, toActor);
+        if (pointer == -1) {
+          Core.shared().setCurrentCursor(Core.CURSOR_NORMAL);
+        }
+      }
+
       public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
         if (!super.touchDown(event, x, y, pointer, button)) return false;
         if (pointer == 0 && button != 0) return false;
@@ -92,6 +110,7 @@ public class CodeEditor extends Widget {
         //selectionStart = cursor;
         Stage stage = getStage();
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
+        Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
         return true;
       }
       
@@ -111,48 +130,29 @@ public class CodeEditor extends Widget {
     Stage stage = getStage();
     if (stage != null && stage.getKeyboardFocus() == this) {
       boolean repeat = false;
-      boolean ctrl   = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
       
-      if (ctrl) {
-        if (keycode == Keys.V) {
-          paste();
-          return true;
-        }
-        if (keycode == Keys.C || keycode == Keys.INSERT) {
-          copy();
-          return true;
-        }
-        if (keycode == Keys.X || keycode == Keys.DEL) {
-          cut();
-          return true;
-        }
-      } 
+      if (keycode == Keys.UP && row > 0) {
+        row -= 1;
+        fixColBoundsValue();
+      }
       
-      if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)) { 
-        if (keycode == Keys.INSERT) {
-          paste();
-        }          
-        if (keycode == Keys.FORWARD_DEL) {
-          if (hasSelection) {
-            copy();
-            delete();
-          }
+      if (keycode == Keys.DOWN && row < this.lines.size() - 1) {
+        row += 1;
+        fixColBoundsValue();
+      }
+      
+      if (keycode == Keys.HOME) {
+        col = 0;
+      }
+      
+      if (keycode == Keys.END) {
+        Line line = getCurrentLine();
+        if (line != null) {
+          col = line.textLenght();
+        } else {
+          col = 0;
         }
-        
-        if (keycode == Keys.LEFT) {
-          if (!hasSelection) {
-            //selectionStart = cursor;
-            hasSelection = true;
-          }
-          while (--col > 0 && ctrl) {
-            char c = text.charAt(col);
-            if (c >= 'A' && c <= 'Z') continue;
-            if (c >= 'a' && c <= 'z') continue;
-            if (c >= '0' && c <= '9') continue;
-            break;
-          }
-          repeat = true;
-        }
+        clearSelection();
       }
       
       return true;
@@ -161,6 +161,10 @@ public class CodeEditor extends Widget {
     }
   }
   
+  private Line getCurrentLine() {
+    return getLineForRow(row);
+  }
+
   private void delete() {
     // TODO Auto-generated method stub
     
@@ -209,6 +213,11 @@ public class CodeEditor extends Widget {
     }
     
     col = x;
+    fixColBoundsValue();
+  }
+
+  private void fixColBoundsValue() {
+    Line line = getCurrentLine();
     if (col > line.textLenght()) {
       col = line.textLenght();
     }
@@ -223,8 +232,7 @@ public class CodeEditor extends Widget {
   }
 
   protected void clearSelection() {
-    row = 0;
-    col = 0;
+    
   }
 
   public float getLineHeight() {

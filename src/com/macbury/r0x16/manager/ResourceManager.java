@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -29,6 +30,7 @@ public class ResourceManager {
   private Map<String, TextureAtlas> atlasMap;
   private Map<String, Skin> skinMap;
   private Map<String, BitmapFont> fonts;
+  private Map<String, Texture> textures;
   public static ResourceManager shared() {
     if (_shared == null) {
       _shared = new ResourceManager();
@@ -40,6 +42,7 @@ public class ResourceManager {
     atlasMap = new HashMap<String, TextureAtlas>();
     skinMap  = new HashMap<String, Skin>();
     fonts    = new HashMap<String, BitmapFont>();
+    textures = new HashMap<String, Texture>();
   }
   
   public void load() throws Exception {
@@ -79,9 +82,20 @@ public class ResourceManager {
           addElementAsTheme(resourceElement);
         } else if (type.equals("font")) {
           addElementAsFont(resourceElement);
+        } else if (type.equals("texture")) {
+          addElementAsTexture(resourceElement);
         }
       }
     }
+  }
+
+  private void addElementAsTexture(Element resourceElement) {
+    String id   = resourceElement.getAttribute("id");
+    String path = resourceElement.getTextContent();
+    path        = "assets/textures/"+path;
+    
+    Gdx.app.log(TAG, "Loading Texture: " + id + " from " + path);
+    textures.put(id, new Texture(Gdx.files.internal(path)));
   }
 
   private void addElementAsFont(Element resourceElement) {
@@ -128,5 +142,9 @@ public class ResourceManager {
   
   public Skin getMainSkin() {
     return this.getSkin("UI_SKIN");
+  }
+
+  public Texture getTexture(String string) {
+    return this.textures.get(string);
   }
 }
