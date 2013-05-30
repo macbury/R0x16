@@ -32,7 +32,7 @@ public class CodeEditorTest implements Screen {
     textField.setWidth(640);
     textField.setHeight(480);
     
-    stage.addActor( textField );
+    textField.addToStage(stage);
     
     camera = new OrthographicCamera();
     camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

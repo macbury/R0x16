@@ -13,6 +13,7 @@ public class Main {
     config.height    = 768;
     config.resizable = false;
     config.samples   = 0;
+    config.vSyncEnabled = true;
     config.fullscreen = false;
     LwjglApplication app = new LwjglApplication(Core.shared(), config);
   }

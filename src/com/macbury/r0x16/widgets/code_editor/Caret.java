@@ -186,7 +186,7 @@ public class Caret {
   }
   
   public void setCursorPosition(int x, int y) {
-    Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y + "  ");
+    //Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y + "  ");
     Line line = getLineForRow(y);
     
     if (line == null) {
@@ -310,7 +310,7 @@ public class Caret {
   public void startSelection() {
     if (!haveSelection()) {
       haveSelection = true;
-      Gdx.app.log(TAG, "Start selection");
+      //Gdx.app.log(TAG, "Start selection");
       this.selectionStartCol = col;
       this.selectionStartRow = row;
     }
@@ -319,7 +319,7 @@ public class Caret {
   
   public void clearSelection() {
     if (haveSelection) {
-      Gdx.app.log(TAG, "Stoping selection");
+      //Gdx.app.log(TAG, "Stoping selection");
       haveSelection = false;
     }
   }

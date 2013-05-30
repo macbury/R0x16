@@ -81,6 +81,10 @@ public class Core extends Game {
     Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     
     super.render();
+    renderCursor();
+  }
+
+  private void renderCursor() {
     try {
       setHWCursorVisible(hwVisible);
     } catch (LWJGLException e) {

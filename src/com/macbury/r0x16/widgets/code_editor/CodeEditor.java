@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.lwjgl.input.Mouse;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -50,18 +51,12 @@ public class CodeEditor extends Widget {
   private final static int GUTTER_PADDING = 10;
   private static final String TAG = "CodeEditor";
   private static final float LINE_PADDING = 2;
-  private final Rectangle fieldBounds = new Rectangle();
-  private final TextBounds textBounds = new TextBounds();
   private ArrayList<Line> lines;
   boolean disabled;
   private String text           = "";
   private int rowScrollPosition = 0;
   private Caret caret;
   private float blinkTime       = 0.32f;
-  private int selectionStartRow = -1;
-  private int selectionStartCol = -1;
-  private int selectionEndRow   = -1;
-  private int selectionEndCol   = -1;
   
   private HashMap<JavaScriptScanner.Kind, Color> styles;
   
@@ -72,7 +67,7 @@ public class CodeEditor extends Widget {
   KeyRepeatTask keyRepeatTask = new KeyRepeatTask();
   float keyRepeatInitialTime  = 0.4f;
   float keyRepeatTime         = 0.1f;
-  private boolean hasSelection;
+  private Slider scrollbar;
   
   class KeyRepeatTask extends Task {
     int keycode;
@@ -101,6 +96,10 @@ public class CodeEditor extends Widget {
     
     caret = new Caret(this.lines);
     initializeKeyboard();
+    
+    scrollbar = new Slider(0, 100, 1, true, skin);
+    scrollbar.setWidth(16);
+    scrollbar.setValue(100);
   }
   
   
@@ -129,11 +128,19 @@ public class CodeEditor extends Widget {
         if (disabled) return true;
         caret.clearSelection();
         caret.setCursorPosition(xToCol(x), yToRow(y));
-        //selectionStart = cursor;
+        caret.startSelection();
         Stage stage = getStage();
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
         Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
         return true;
+      }
+      
+      public void touchDragged (InputEvent event, float x, float y, int pointer) {
+        super.touchDragged(event, x, y, pointer);
+        lastBlink = 0;
+        cursorOn = false;
+        caret.setCursorPosition(xToCol(x), yToRow(y));
+        caret.startSelection();
       }
       
       public boolean keyDown(InputEvent event, int keycode) {
@@ -155,7 +162,11 @@ public class CodeEditor extends Widget {
   public void insertText(String ins) {
     Line line       = caret.getCurrentLine();
     String lineText = line.getCachedFullText();
-    line.setCachedFullText(lineText.substring(0, caret.getCol()) + ins + lineText.substring(caret.getCol(), lineText.length()));
+    String finalText = lineText.substring(0, caret.getCol()) + ins;
+    if (caret.getCol() < lineText.length()) {
+      finalText += lineText.substring(caret.getCol(), lineText.length());
+    }
+    line.setCachedFullText(finalText);
     parse(buildStringFromLines());
   }
 
@@ -176,13 +187,16 @@ public class CodeEditor extends Widget {
     if (disabled) return false;
     Stage stage = getStage();
     if (stage != null && stage.getKeyboardFocus() == this) {
+      
       if (character == BACKSPACE) {
         delete();
       } else if (character == ENTER_DESKTOP) {
+        caret.clearSelection();
         insertText("\n");
         caret.incRow();
         caret.setCol(0);
       } else if (getFont().containsCharacter(character)) {
+        caret.clearSelection();
         insertText(String.valueOf(character));
         caret.incCol(1);
       } else {
@@ -327,8 +341,6 @@ public class CodeEditor extends Widget {
     return r;
   }
 
-  
-
   public float getLineHeight() {
     return getFont().getLineHeight() + LINE_PADDING;
   }
@@ -347,8 +359,7 @@ public class CodeEditor extends Widget {
     Stage stage     = getStage();
     boolean focused = stage != null && stage.getKeyboardFocus() == this;
     
-    final BitmapFont font = getFont();
-    final Drawable selection = style.selection;
+    final BitmapFont font      = getFont();
     final Drawable cursorPatch = style.cursor;
 
     Color color = getColor();
@@ -472,8 +483,19 @@ public class CodeEditor extends Widget {
       }
     }
     
+    
+    scrollbar.setPosition(sx + getWidth(), sy);
+    scrollbar.setHeight(height);
+   // scrollbar.draw(renderBatch, parentAlpha);
   }
   
+  @Override
+  public void act(float delta) {
+    super.act(delta);
+    //scrollbar.act(Gdx.graphics.getDeltaTime());
+  }
+
+
   private BitmapFont getFont() {
     return ResourceManager.shared().getFont("CURRIER_NEW");
   }
@@ -546,6 +568,11 @@ public class CodeEditor extends Widget {
       if (style.disabledFontColor != null) this.disabledFontColor = new Color(style.disabledFontColor);
       this.selection = style.selection;
     }
+  }
+
+  public void addToStage(Stage stage) {
+    stage.addActor(this);
+    stage.addActor(this.scrollbar);
   }
   
 }
