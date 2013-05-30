@@ -243,6 +243,8 @@ public class CodeEditor extends Widget {
       if (keycode == Keys.UP && caret.getRow() > 0) {
         if (shift) {
           caret.startSelection();
+        } else {
+          caret.clearSelection();
         }
         caret.moveRowUp();
         repeat = true;
@@ -251,6 +253,8 @@ public class CodeEditor extends Widget {
       if (keycode == Keys.DOWN && caret.getRow() < this.lines.size() - 1) {
         if (shift) {
           caret.startSelection();
+        } else {
+          caret.clearSelection();
         }
         caret.moveRowDown();
         repeat = true;
@@ -372,28 +376,58 @@ public class CodeEditor extends Widget {
     shape.end();
     
     if (caret.haveSelection()) {
-      int cursorColStart = caret.getSelectionStartCol();
-      int cursorRowStart = Math.min(caret.getRow(), caret.getSelectionStartRow());
+      int cursorRowStart = Math.min(caret.getSelectionStartRow(), caret.getRow());
+      int cursorRowEnd   = Math.max(caret.getRow(), caret.getSelectionStartRow());
       
-      int cursorColEnd = caret.getCol();
-      int cursorRowEnd = Math.max(caret.getRow(), caret.getSelectionStartRow());
+      int cursorColEnd   = caret.getCol();
+      int cursorColStart = caret.getSelectionStartCol();
+      if (caret.getRow() < caret.getSelectionStartRow()) {
+        cursorColEnd   = caret.getSelectionStartCol();
+        cursorColStart = caret.getCol();
+      }
       
       Gdx.gl.glEnable(GL10.GL_BLEND);
       Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
       
       shape.begin(ShapeType.Filled);
-      shape.setColor(1.0f, 1.0f, 1.0f, 0.2f);
-      shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()), 
-          (sy + height) - (caret.getRow() + 1) * getLineHeight(), 
-          ((cursorColEnd - cursorColStart) * getFont().getSpaceWidth()), 
-          getLineHeight()
-      );
+      shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
+      
+      if (cursorRowStart == cursorRowEnd) {
+        shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()), 
+            (sy + height) - (caret.getRow() + 1) * getLineHeight(), 
+            ((cursorColEnd - cursorColStart) * getFont().getSpaceWidth()), 
+            getLineHeight()
+        );
+      } else {
+        int rowCount = Math.abs(cursorRowStart - cursorRowEnd) - 1;
+        
+        shape.rect(sx + gutterWidth() + GUTTER_PADDING + cursorColStart * font.getSpaceWidth(), 
+            (sy + height) - (cursorRowStart+1) * getLineHeight(), 
+            width - gutterWidth() - GUTTER_PADDING - cursorColStart * font.getSpaceWidth(), 
+            getLineHeight()
+        );
+        
+        for (int i = 0; i < rowCount; i++) {
+          shape.rect(sx + gutterWidth() + GUTTER_PADDING, 
+              (sy + height) - (cursorRowStart + i + 2) * getLineHeight(), 
+              width - gutterWidth() - GUTTER_PADDING, 
+              getLineHeight()
+          );
+        }
+        
+        shape.rect(sx + gutterWidth() + GUTTER_PADDING, 
+            (sy + height) - (cursorRowEnd+1) * getLineHeight(), 
+            cursorColEnd * font.getSpaceWidth(), 
+            getLineHeight()
+        );
+      }
+      
       shape.end();
       
       Gdx.gl.glDisable(GL10.GL_BLEND);
     }
     
-    if (focused) {
+    if (focused && !caret.haveSelection()) {
       Gdx.gl.glEnable(GL10.GL_BLEND);
       Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
       shape.begin(ShapeType.Filled);
