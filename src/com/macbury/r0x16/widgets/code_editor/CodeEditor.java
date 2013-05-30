@@ -50,8 +50,7 @@ public class CodeEditor extends Widget {
   boolean disabled;
   private String text           = "";
   private int rowScrollPosition = 0;
-  private int row               = 0;
-  private int col               = 0;
+  private Caret caret;
   private float blinkTime       = 0.32f;
   private int selectionStartRow = -1;
   private int selectionStartCol = -1;
@@ -64,7 +63,19 @@ public class CodeEditor extends Widget {
   private boolean cursorOn;
   private Clipboard clipboard;
   private ClickListener inputListener;
+  KeyRepeatTask keyRepeatTask = new KeyRepeatTask();
+  float keyRepeatInitialTime  = 0.4f;
+  float keyRepeatTime         = 0.1f;
   private boolean hasSelection;
+  
+  class KeyRepeatTask extends Task {
+    int keycode;
+
+    public void run () {
+      inputListener.keyDown(null, keycode);
+    }
+  }
+  
   public CodeEditor(Skin skin) {
     style  = skin.get(CodeEditorStyle.class);
     lines  = new ArrayList<Line>();
@@ -79,8 +90,10 @@ public class CodeEditor extends Widget {
     setWidth(getPrefWidth());
     setHeight(getPrefHeight());
     
+    caret = new Caret(this.lines);
     initializeKeyboard();
   }
+  
   
   private void initializeKeyboard() {
     addListener(inputListener = new ClickListener() {
@@ -105,8 +118,8 @@ public class CodeEditor extends Widget {
         if (!super.touchDown(event, x, y, pointer, button)) return false;
         if (pointer == 0 && button != 0) return false;
         if (disabled) return true;
-        clearSelection();
-        setCursorPosition(xToCol(x), yToRow(y));
+        caret.clearSelection();
+        caret.setCursorPosition(xToCol(x), yToRow(y));
         //selectionStart = cursor;
         Stage stage = getStage();
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
@@ -117,42 +130,69 @@ public class CodeEditor extends Widget {
       public boolean keyDown(InputEvent event, int keycode) {
         return onKeyDown(event, keycode);
       }
+      
+      public boolean keyUp (InputEvent event, int keycode) {
+        if (disabled) return false;
+        keyRepeatTask.cancel();
+        return true;
+      }
     });
   }
-  
+
+
   protected boolean onKeyDown(InputEvent event, int keycode) {
     if (disabled) return false;
     
     final BitmapFont font = getFont();
-
-    lastBlink = 0;
-    cursorOn = false;
+    lastBlink   = 0;
+    cursorOn    = false;
     Stage stage = getStage();
+    
     if (stage != null && stage.getKeyboardFocus() == this) {
       boolean repeat = false;
-      
-      if (keycode == Keys.UP && row > 0) {
-        row -= 1;
-        fixColBoundsValue();
+      boolean ctrl   = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
+      if (keycode == Keys.LEFT) {
+        if (ctrl) {
+          caret.moveByWordInLeft();
+        } else {
+          caret.moveOneCharLeft();
+          caret.clearSelection();
+        }
+        repeat = true;
       }
       
-      if (keycode == Keys.DOWN && row < this.lines.size() - 1) {
-        row += 1;
-        fixColBoundsValue();
+      if (keycode == Keys.RIGHT) {
+        if (ctrl) {
+          caret.moveByWordInRight();
+        } else {
+          caret.moveOneCharRight();
+          caret.clearSelection();
+        }
+        repeat = true;
+      }
+      
+      if (keycode == Keys.UP && caret.getRow() > 0) {
+        caret.moveRowUp();
+        repeat = true;
+      }
+      
+      if (keycode == Keys.DOWN && caret.getRow() < this.lines.size() - 1) {
+        caret.moveRowDown();
+        repeat = true;
       }
       
       if (keycode == Keys.HOME) {
-        col = 0;
+        caret.setColHome();
       }
       
       if (keycode == Keys.END) {
-        Line line = getCurrentLine();
-        if (line != null) {
-          col = line.textLenght();
-        } else {
-          col = 0;
-        }
-        clearSelection();
+        caret.setColEnd();
+      }
+      
+      if (repeat && (!keyRepeatTask.isScheduled() || keyRepeatTask.keycode != keycode)) {
+        keyRepeatTask.keycode = keycode;
+        keyRepeatTask.cancel();
+        Timer.schedule(keyRepeatTask, keyRepeatInitialTime, keyRepeatTime);
       }
       
       return true;
@@ -161,9 +201,10 @@ public class CodeEditor extends Widget {
     }
   }
   
-  private Line getCurrentLine() {
-    return getLineForRow(row);
-  }
+  
+
+
+  
 
   private void delete() {
     // TODO Auto-generated method stub
@@ -185,7 +226,9 @@ public class CodeEditor extends Widget {
     
   }
 
-  protected int xToCol(float x) {
+  
+
+  public int xToCol(float x) {
     int c = (int) Math.floor((x - gutterWidth() - GUTTER_PADDING) / getFont().getSpaceWidth());
     if (c < 0) {
       c = 0;
@@ -193,47 +236,15 @@ public class CodeEditor extends Widget {
     return c;
   }
   
-  protected int yToRow(float y) {
+  public int yToRow(float y) {
     int r = (int) Math.floor((getHeight() - y) / getLineHeight());
     if (r < 0) {
       r = 0;
     }
     return r;
   }
+
   
-  protected void setCursorPosition(int x, int y) {
-    Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y);
-    Line line = getLineForRow(y);
-    
-    if (line == null) {
-      row = (this.lines.size() - 1);
-      line = this.getLineForRow(row);
-    } else {
-      row = y;
-    }
-    
-    col = x;
-    fixColBoundsValue();
-  }
-
-  private void fixColBoundsValue() {
-    Line line = getCurrentLine();
-    if (col > line.textLenght()) {
-      col = line.textLenght();
-    }
-  }
-
-  private Line getLineForRow(int y) {
-    try {
-      return lines.get(y);
-    } catch (IndexOutOfBoundsException e) {
-      return null;
-    }
-  }
-
-  protected void clearSelection() {
-    
-  }
 
   public float getLineHeight() {
     return getFont().getLineHeight() + LINE_PADDING;
@@ -247,23 +258,6 @@ public class CodeEditor extends Widget {
     return (int) (this.getHeight() / getLineHeight());
   }
   
-  private int getCaretPositionFor(int r, int c) {
-    Line line = getLineForRow(r);
-    if (line == null) {
-      return 0;
-    } else {
-      int width = c;
-      for (int y = 0; y < r; y++) {
-        line = getLineForRow(y);
-        width += line.textLenght();
-      }
-      return width;
-    }
-  }
-  
-  private int getCaretPosition() {
-    return getCaretPositionFor(row, col);
-  }
   
   @Override
   public void draw(SpriteBatch renderBatch, float parentAlpha) {
@@ -300,7 +294,7 @@ public class CodeEditor extends Widget {
       Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
       shape.begin(ShapeType.FilledRectangle);
       shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
-      shape.filledRect(sx, (sy + height) - (row + 1) * getLineHeight(), width, getLineHeight());
+      shape.filledRect(sx, (sy + height) - (caret.getRow() + 1) * getLineHeight(), width, getLineHeight());
       shape.end();
       Gdx.gl.glDisable(GL10.GL_BLEND);
     }
@@ -333,7 +327,7 @@ public class CodeEditor extends Widget {
     if (focused && !disabled) {
       blink();
       if (cursorOn && cursorPatch != null) {
-        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + (col * getFont().getSpaceWidth()), (sy + height) - (row + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
+        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + (caret.getCol() * getFont().getSpaceWidth()), (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
       }
     }
   }
