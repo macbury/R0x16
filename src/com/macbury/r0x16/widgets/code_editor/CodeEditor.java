@@ -158,8 +158,12 @@ public class CodeEditor extends Widget {
 
   private String buildStringFromLines() {
     String s = "";
-    for (Line line : this.lines) {
-      s += line.getCachedFullText() + "\n";
+    for (int i = 0; i < this.lines.size(); i++) {
+      Line line = lines.get(i);
+      s += line.getCachedFullText();
+      if (i != this.lines.size() -1) {
+        s+= "\n";
+      }
     }
     return s;
   }
