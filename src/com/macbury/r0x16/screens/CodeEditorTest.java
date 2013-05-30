@@ -21,7 +21,7 @@ public class CodeEditorTest implements Screen {
     startGameButton.setX(30);
     startGameButton.setY(710);
     startGameButton.setWidth(120);
-    startGameButton.setHeight(30);
+    startGameButton.setHeight(60);
 
     stage.addActor( startGameButton );
     

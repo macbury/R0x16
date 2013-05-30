@@ -328,23 +328,23 @@ public class CodeEditor extends Widget {
     
     renderBatch.end();
     shape.setProjectionMatrix(renderBatch.getProjectionMatrix());
-    shape.begin(ShapeType.FilledRectangle);
+    shape.begin(ShapeType.Filled);
     shape.setColor(0.1f, 0.1f, 0.1f, 1);
     
-    shape.filledRect(sx, sy, width, height);
+    shape.rect(sx, sy, width, height);
     shape.end();
     
-    shape.begin(ShapeType.FilledRectangle);
+    shape.begin(ShapeType.Filled);
     shape.setColor(0.25f, 0.25f, 0.25f, 1.0f);
-    shape.filledRect(sx, sy, gutterWidth() + GUTTER_PADDING / 2 , height);
+    shape.rect(sx, sy, gutterWidth() + GUTTER_PADDING / 2 , height);
     shape.end();
     
     if (focused) {
       Gdx.gl.glEnable(GL10.GL_BLEND);
       Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
-      shape.begin(ShapeType.FilledRectangle);
+      shape.begin(ShapeType.Filled);
       shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
-      shape.filledRect(sx, (sy + height) - (caret.getRow() + 1) * getLineHeight(), width, getLineHeight());
+      shape.rect(sx, (sy + height) - (caret.getRow() + 1) * getLineHeight(), width, getLineHeight());
       shape.end();
       Gdx.gl.glDisable(GL10.GL_BLEND);
     }
@@ -411,12 +411,10 @@ public class CodeEditor extends Widget {
     this.lines.add(line);
     while((kind=js.scan()) != JavaScriptScanner.Kind.EOF) {
       if(kind == JavaScriptScanner.Kind.NEWLINE) {
-        Gdx.app.log(TAG, kind.toString());
         line = new Line();
         this.lines.add(line);
       } else {
         line.add(new Element(kind, js.getString()));
-        Gdx.app.log(TAG, js.getString());
       }
     }
     
