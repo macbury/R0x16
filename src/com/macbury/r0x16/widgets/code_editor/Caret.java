@@ -161,7 +161,6 @@ public class Caret {
       return ' ';
     }
   }
-
   
   public void moveByWordInDirection(int direction) {
     while (canMoveCursorInDirection(direction)) {
@@ -183,10 +182,8 @@ public class Caret {
     }
   }
   
- 
-  
   public void setCursorPosition(int x, int y) {
-    Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y);
+    Gdx.app.log(TAG, "Set cursor position at: " + x + "x"+y + "  ");
     Line line = getLineForRow(y);
     
     if (line == null) {
@@ -295,5 +292,13 @@ public class Caret {
   
   public char getChar(int i) {
     return getCurrentLine().charAt(i);
+  }
+
+  public void incCol(int i) {
+    this.col++;
+  }
+
+  public void incRow() {
+    this.row++;
   }
 }

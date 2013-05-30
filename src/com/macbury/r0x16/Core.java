@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.screens.CodeEditorTest;
 import com.macbury.r0x16.screens.LightTestScreen;
+import com.macbury.r0x16.screens.TwlTest;
 
 public class Core extends Game {
   public final static String CURSOR_NORMAL = "CURSOR_ARROW";

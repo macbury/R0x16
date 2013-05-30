@@ -19,5 +19,7 @@
 	<classpathentry kind="lib" path="libs/jars/box2dlights.jar" sourcepath="libs/jars/src/box2dlights-sources.jar"/>
 	<classpathentry kind="lib" path="libs/jars/gdx-freetype-natives.jar"/>
 	<classpathentry kind="lib" path="libs/jars/gdx-freetype.jar" sourcepath="libs/jars/src/gdx-freetype-sources.jar"/>
+	<classpathentry kind="lib" path="libs/jars/TWL.jar" sourcepath="C:/Users/Arkadiusz/Projekty/twl-src"/>
+	<classpathentry kind="lib" path="libs/jars/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

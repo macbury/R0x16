@@ -39,6 +39,12 @@ import com.macbury.r0x16.widgets.JavaScriptScanner;
 import com.macbury.r0x16.widgets.JavaScriptScanner.Kind;
 
 public class CodeEditor extends Widget {
+  static private final char BACKSPACE = 8;
+  static private final char ENTER_DESKTOP = '\r';
+  static private final char ENTER_ANDROID = '\n';
+  static private final char TAB = '\t';
+  static private final char DELETE = 127;
+  static private final char BULLET = 149;
   ShapeRenderer shape;
   CodeEditorStyle style;
   private final static int GUTTER_PADDING = 10;
@@ -136,7 +142,47 @@ public class CodeEditor extends Widget {
         keyRepeatTask.cancel();
         return true;
       }
+      
+      public boolean keyTyped (InputEvent event, char character) {
+        return onKeyTyped(event, character);
+      }
     });
+  }
+
+  public void insertText(String ins) {
+    Line line       = caret.getCurrentLine();
+    String lineText = line.getCachedFullText();
+    line.setCachedFullText(lineText.substring(0, caret.getCol()) + ins + lineText.substring(caret.getCol(), lineText.length()));
+    parse(buildStringFromLines());
+  }
+
+  private String buildStringFromLines() {
+    String s = "";
+    for (Line line : this.lines) {
+      s += line.getCachedFullText() + "\n";
+    }
+    return s;
+  }
+
+
+  protected boolean onKeyTyped(InputEvent event, char character) {
+    if (disabled) return false;
+    Stage stage = getStage();
+    if (stage != null && stage.getKeyboardFocus() == this) {
+      if (character == ENTER_DESKTOP) {
+        insertText("\n");
+        caret.incRow();
+        caret.setCol(0);
+      } else if (getFont().containsCharacter(character)) {
+        insertText(String.valueOf(character));
+        caret.incCol(1);
+      } else {
+        return false;
+      }
+      
+      return true;
+    }
+    return false;
   }
 
 
@@ -324,10 +370,13 @@ public class CodeEditor extends Widget {
       }
     }
     
+    font.setColor(Color.WHITE);
+    font.draw(renderBatch, "Row "+ caret.getRow() + " Col " + caret.getCol() + " Char " + String.valueOf(caret.getCurrentChar()), sx, sy - getLineHeight() + GUTTER_PADDING);
+    
     if (focused && !disabled) {
       blink();
       if (cursorOn && cursorPatch != null) {
-        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + (caret.getCol() * getFont().getSpaceWidth()), (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
+        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()), (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
       }
     }
   }
@@ -344,6 +393,34 @@ public class CodeEditor extends Widget {
     }
   }
 
+  public void setText(String string) {
+    this.text  = string;
+    parse(this.text);
+  }
+  
+  public void parse(String text) {
+    this.lines.clear();
+    JavaScriptScanner js = new JavaScriptScanner(text);
+    JavaScriptScanner.Kind kind;
+    
+    Line line = new Line();
+    this.lines.add(line);
+    while((kind=js.scan()) != JavaScriptScanner.Kind.EOF) {
+      if(kind == JavaScriptScanner.Kind.NEWLINE) {
+        Gdx.app.log(TAG, kind.toString());
+        line = new Line();
+        this.lines.add(line);
+      } else {
+        line.add(new Element(kind, js.getString()));
+        Gdx.app.log(TAG, js.getString());
+      }
+    }
+    
+    for (Line row : lines) {
+      row.buildString();
+    }
+  }
+  
   static public class CodeEditorStyle {
     public BitmapFont font;
     public Color fontColor, focusedFontColor, disabledFontColor;
@@ -379,29 +456,5 @@ public class CodeEditor extends Widget {
       this.selection = style.selection;
     }
   }
-
-  public void setText(String string) {
-    this.text  = string;
-    parse(this.text);
-  }
   
-  public void parse(String text) {
-    this.lines.clear();
-    JavaScriptScanner js = new JavaScriptScanner(text);
-    JavaScriptScanner.Kind kind;
-    
-    Line line = new Line();
-    this.lines.add(line);
-    while((kind=js.scan()) != JavaScriptScanner.Kind.EOF) {
-      if(kind == JavaScriptScanner.Kind.NEWLINE) {
-        //Gdx.app.log(TAG, kind.toString());
-        line = new Line();
-        this.lines.add(line);
-      } else {
-        line.add(new Element(kind, js.getString()));
-        //Gdx.app.log(TAG, js.getString());
-      }
-    }
-    
-  }
 }
