@@ -39,7 +39,7 @@ import com.macbury.r0x16.widgets.JavaScriptScanner;
 import com.macbury.r0x16.widgets.JavaScriptScanner.Kind;
 
 public class CodeEditor extends Widget {
-  static private final char BACKSPACE = 8;
+  static private final char BACKSPACE = '\b';
   static private final char ENTER_DESKTOP = '\r';
   static private final char ENTER_ANDROID = '\n';
   static private final char TAB = '\t';
@@ -86,12 +86,15 @@ public class CodeEditor extends Widget {
     style  = skin.get(CodeEditorStyle.class);
     lines  = new ArrayList<Line>();
     styles = new HashMap<JavaScriptScanner.Kind, Color>();
+    
     styles.put(JavaScriptScanner.Kind.KEYWORD, new Color(252.0f/255.0f, 128.0f/255.0f, 58.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.NORMAL, Color.WHITE);
     styles.put(JavaScriptScanner.Kind.STRING, new Color(142.0f/255.0f, 198.0f/255.0f, 95.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.COMMENT, new Color(95.0f/255.0f, 90.0f/255.0f, 96.0f/255.0f, 1.0f));
-    shape = new ShapeRenderer();
     
+    shape     = new ShapeRenderer();
+    this.text = "";
+    this.parse(this.text);
     this.clipboard = Gdx.app.getClipboard();
     setWidth(getPrefWidth());
     setHeight(getPrefHeight());
@@ -173,7 +176,9 @@ public class CodeEditor extends Widget {
     if (disabled) return false;
     Stage stage = getStage();
     if (stage != null && stage.getKeyboardFocus() == this) {
-      if (character == ENTER_DESKTOP) {
+      if (character == BACKSPACE) {
+        delete();
+      } else if (character == ENTER_DESKTOP) {
         insertText("\n");
         caret.incRow();
         caret.setCol(0);
@@ -201,41 +206,67 @@ public class CodeEditor extends Widget {
     if (stage != null && stage.getKeyboardFocus() == this) {
       boolean repeat = false;
       boolean ctrl   = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
+      boolean shift  = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)   || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
+      
       if (keycode == Keys.LEFT) {
+        if (shift) {
+          caret.startSelection();
+        }
         if (ctrl) {
           caret.moveByWordInLeft();
         } else {
-          caret.moveOneCharLeft();
-          caret.clearSelection();
+          if (caret.haveSelection() && !shift) {
+            caret.clearSelection();
+          } else {
+            caret.moveOneCharLeft();
+          }
         }
         repeat = true;
       }
       
       if (keycode == Keys.RIGHT) {
+        if (shift) {
+          caret.startSelection();
+        }
         if (ctrl) {
           caret.moveByWordInRight();
         } else {
-          caret.moveOneCharRight();
-          caret.clearSelection();
+          if (caret.haveSelection() && !shift) {
+            caret.clearSelection();
+          } else {
+            caret.moveOneCharRight();
+          }
         }
         repeat = true;
       }
       
       if (keycode == Keys.UP && caret.getRow() > 0) {
+        if (shift) {
+          caret.startSelection();
+        }
         caret.moveRowUp();
         repeat = true;
       }
       
       if (keycode == Keys.DOWN && caret.getRow() < this.lines.size() - 1) {
+        if (shift) {
+          caret.startSelection();
+        }
         caret.moveRowDown();
         repeat = true;
       }
       
       if (keycode == Keys.HOME) {
+        if (shift) {
+          caret.startSelection();
+        }
         caret.setColHome();
       }
       
       if (keycode == Keys.END) {
+        if (shift) {
+          caret.startSelection();
+        }
         caret.setColEnd();
       }
       
@@ -251,14 +282,12 @@ public class CodeEditor extends Widget {
     }
   }
   
-  
-
-
-  
-
   private void delete() {
-    // TODO Auto-generated method stub
-    
+    Line line       = caret.getCurrentLine();
+    String lineText = line.getCachedFullText();
+    int ex = caret.getCol();
+    line.setCachedFullText(lineText.substring(0, caret.getCol()-1) + lineText.substring(caret.getCol(), lineText.length()));
+    parse(buildStringFromLines());
   }
 
   private void cut() {
@@ -311,8 +340,6 @@ public class CodeEditor extends Widget {
   
   @Override
   public void draw(SpriteBatch renderBatch, float parentAlpha) {
-    
-    
     Stage stage     = getStage();
     boolean focused = stage != null && stage.getKeyboardFocus() == this;
     
@@ -328,9 +355,9 @@ public class CodeEditor extends Widget {
     
     renderBatch.end();
     shape.setProjectionMatrix(renderBatch.getProjectionMatrix());
+      
     shape.begin(ShapeType.Filled);
     shape.setColor(0.1f, 0.1f, 0.1f, 1);
-    
     shape.rect(sx, sy, width, height);
     shape.end();
     
@@ -338,6 +365,33 @@ public class CodeEditor extends Widget {
     shape.setColor(0.25f, 0.25f, 0.25f, 1.0f);
     shape.rect(sx, sy, gutterWidth() + GUTTER_PADDING / 2 , height);
     shape.end();
+    
+    shape.begin(ShapeType.Line);
+    shape.setColor(0.3f, 0.3f, 0.3f, 1);
+    shape.rect(sx, sy, width, height);
+    shape.end();
+    
+    if (caret.haveSelection()) {
+      int cursorColStart = caret.getSelectionStartCol();
+      int cursorRowStart = Math.min(caret.getRow(), caret.getSelectionStartRow());
+      
+      int cursorColEnd = caret.getCol();
+      int cursorRowEnd = Math.max(caret.getRow(), caret.getSelectionStartRow());
+      
+      Gdx.gl.glEnable(GL10.GL_BLEND);
+      Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
+      
+      shape.begin(ShapeType.Filled);
+      shape.setColor(1.0f, 1.0f, 1.0f, 0.2f);
+      shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()), 
+          (sy + height) - (caret.getRow() + 1) * getLineHeight(), 
+          ((cursorColEnd - cursorColStart) * getFont().getSpaceWidth()), 
+          getLineHeight()
+      );
+      shape.end();
+      
+      Gdx.gl.glDisable(GL10.GL_BLEND);
+    }
     
     if (focused) {
       Gdx.gl.glEnable(GL10.GL_BLEND);
@@ -383,6 +437,7 @@ public class CodeEditor extends Widget {
         cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()), (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
       }
     }
+    
   }
   
   private BitmapFont getFont() {

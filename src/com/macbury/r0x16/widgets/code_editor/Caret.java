@@ -9,6 +9,9 @@ public class Caret {
   private int col = 0;
   private int row = 0;
   private ArrayList<Line> lines;
+  private boolean haveSelection = false;
+  private int selectionStartRow;
+  private int selectionStartCol;
   
   public Caret(ArrayList<Line> linesArray) {
     this.lines = linesArray;
@@ -238,9 +241,7 @@ public class Caret {
     }
   }
   
-  public void clearSelection() {
-    
-  }
+
 
   public void setColHome() {
     setCol(0);
@@ -300,5 +301,34 @@ public class Caret {
 
   public void incRow() {
     this.row++;
+  }
+
+  public boolean haveSelection() {
+    return haveSelection;
+  }
+
+  public void startSelection() {
+    if (!haveSelection()) {
+      haveSelection = true;
+      Gdx.app.log(TAG, "Start selection");
+      this.selectionStartCol = col;
+      this.selectionStartRow = row;
+    }
+    
+  }
+  
+  public void clearSelection() {
+    if (haveSelection) {
+      Gdx.app.log(TAG, "Stoping selection");
+      haveSelection = false;
+    }
+  }
+
+  public int getSelectionStartRow() {
+    return selectionStartRow;
+  }
+
+  public int getSelectionStartCol() {
+    return selectionStartCol;
   }
 }

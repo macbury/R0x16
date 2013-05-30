@@ -27,7 +27,7 @@ public class JavaScriptScanner {
     }
 
     private static final KeywordList KEYWORD_LIST = new KeywordList(
-            "function", "true", "false", "var", "for", "while", "if", "else", "null", "this");
+            "function", "true", "false", "var", "for", "while", "if", "else", "null", "this", "new", "switch", "case", "break", "try", "catch", "do", "instanceof", "return", "throw", "typeof", "with");
 
     private final CharacterIterator iterator;
 
@@ -98,7 +98,7 @@ public class JavaScriptScanner {
             int ch = iterator.next();
             if(ch == '\\') {
                 iterator.next();
-            } else if(ch == endMarker || ch == '\n') {
+            } else if(ch == endMarker || ch == '\n' || ch == '\r') {
                 return;
             }
         }
