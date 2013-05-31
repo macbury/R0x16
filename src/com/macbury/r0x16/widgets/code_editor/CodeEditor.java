@@ -51,10 +51,12 @@ public class CodeEditor extends Widget {
   private final static int GUTTER_PADDING = 10;
   private static final String TAG = "CodeEditor";
   private static final float LINE_PADDING = 2;
+  
   private ArrayList<Line> lines;
   boolean disabled;
   private String text           = "";
   private int rowScrollPosition = 0;
+  private int colScrollPosition = 0;
   private Caret caret;
   private float blinkTime       = 0.32f;
   
@@ -353,6 +355,9 @@ public class CodeEditor extends Widget {
     return (int) (this.getHeight() / getLineHeight());
   }
   
+  private int visibleCharsCount() {
+    return (int) ((this.getWidth()- gutterWidth() - GUTTER_PADDING) / getFont().getSpaceWidth());
+  }
   
   @Override
   public void draw(SpriteBatch renderBatch, float parentAlpha) {
@@ -454,6 +459,9 @@ public class CodeEditor extends Widget {
     int fromLine = rowScrollPosition;
     int toLine   = Math.min(fromLine + visibleLinesCount(), this.lines.size());
     
+    int fromChar = colScrollPosition;
+    int toChar   = fromChar + visibleCharsCount();
+    
     for (int y = fromLine; y < toLine; y++) {
       Line line               = this.lines.get(y);
       float linePosY          = (sy + height + font.getDescent()) - y * getLineHeight();
@@ -470,6 +478,9 @@ public class CodeEditor extends Widget {
         font.draw(renderBatch, elem.text, sx + gutterWidth() + GUTTER_PADDING + lineElementX, linePosY );
         
         lineElementX += bounds.width;
+        if (lineElementX > toChar) {
+          break;
+        }
       }
     }
     

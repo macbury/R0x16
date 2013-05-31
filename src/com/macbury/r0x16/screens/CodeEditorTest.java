@@ -29,8 +29,8 @@ public class CodeEditorTest implements Screen {
     textField.setText(Gdx.files.internal("assets/example.js").readString());
     textField.setX(30);
     textField.setY(170);
-    textField.setWidth(640);
-    textField.setHeight(480);
+    textField.setWidth(320);
+    textField.setHeight(240);
     
     textField.addToStage(stage);
     
