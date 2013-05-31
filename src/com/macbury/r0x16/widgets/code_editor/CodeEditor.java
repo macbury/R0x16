@@ -86,7 +86,7 @@ public class CodeEditor extends Widget {
     styles.put(JavaScriptScanner.Kind.NORMAL, Color.WHITE);
     styles.put(JavaScriptScanner.Kind.STRING, new Color(142.0f/255.0f, 198.0f/255.0f, 95.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.COMMENT, new Color(95.0f/255.0f, 90.0f/255.0f, 96.0f/255.0f, 1.0f));
-    
+    styles.put(JavaScriptScanner.Kind.NUMBER, new Color(127.0f/255.0f, 197.0f/255.0f, 120.0f/255.0f, 1.0f));
     shape     = new ShapeRenderer();
     this.text = "";
     this.parse(this.text);

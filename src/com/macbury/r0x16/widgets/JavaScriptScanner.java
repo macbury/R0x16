@@ -23,7 +23,8 @@ public class JavaScriptScanner {
         /** A comment - multi line comments are split up and {@link NEWLINE} tokens are inserted */
         COMMENT,
         /** A javadoc tag inside a comment */
-        COMMENT_TAG
+        COMMENT_TAG,
+        NUMBER
     }
 
     private static final KeywordList KEYWORD_LIST = new KeywordList(
@@ -132,36 +133,38 @@ public class JavaScriptScanner {
     }
 
     private Kind scanNormal(int ch) {
-        for(;;) {
-            switch(ch) {
-                case '\n':
-                case '\"':
-                case '\'':
-                case CharacterIterator.EOF:
-                    iterator.pushback();
-                    return Kind.NORMAL;
-                case '/':
-                    if(iterator.check("/*")) {
-                        iterator.pushback();
-                        return Kind.NORMAL;
-                    }
-                    break;
-                default:
-                    if(Character.isJavaIdentifierStart(ch)) {
-                        iterator.setMarker(true);
-                        iterator.advanceIdentifier();
-                        if(iterator.isKeyword(KEYWORD_LIST)) {
-                            if(iterator.isMarkerAtStart()) {
-                                return Kind.KEYWORD;
-                            }
-                            iterator.rewindToMarker();
-                            return Kind.NORMAL;
-                        }
-                    }
-                    break;
+      for(;;) {
+        switch(ch) {
+          case '\n':
+          case '\"':
+          case '\'':
+          case CharacterIterator.EOF:
+            iterator.pushback();
+            return Kind.NORMAL;
+          case '/':
+            if(iterator.check("/*")) {
+                iterator.pushback();
+                return Kind.NORMAL;
             }
-            ch = iterator.next();
+            break;
+          default:
+            if(Character.isJavaIdentifierStart(ch)) {
+                iterator.setMarker(true);
+                iterator.advanceIdentifier();
+                if(iterator.isKeyword(KEYWORD_LIST)) {
+                    if(iterator.isMarkerAtStart()) {
+                        return Kind.KEYWORD;
+                    }
+                    iterator.rewindToMarker();
+                    return Kind.NORMAL;
+                } else if (Character.isDigit(ch)) {
+                  return Kind.NUMBER;
+                } 
+            }
+            break;
         }
+        ch = iterator.next();
+      }
     }
     
 }

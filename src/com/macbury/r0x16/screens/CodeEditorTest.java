@@ -26,7 +26,7 @@ public class CodeEditorTest implements Screen {
     stage.addActor( startGameButton );
     
     CodeEditor textField = new CodeEditor(skin);
-    textField.setText("var engine = null;\nvar hello = 'testing';\nfunction loop() {\n  engine.run();\n  log('hello!');\n  // Testing commen \n}");
+    textField.setText(Gdx.files.internal("assets/example.js").readString());
     textField.setX(30);
     textField.setY(170);
     textField.setWidth(640);
