@@ -303,6 +303,10 @@ public class Caret {
   }
 
   public void incCol(int i) {
+    this.col+=i;
+  }
+  
+  public void incCol() {
     this.col++;
   }
 

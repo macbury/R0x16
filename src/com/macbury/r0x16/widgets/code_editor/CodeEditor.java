@@ -213,7 +213,11 @@ public class CodeEditor extends Widget {
     if (disabled) return false;
     Stage stage = getStage();
     if (stage != null && stage.getKeyboardFocus() == this) {
-      if (character == DELETE) {
+      if (character == TAB) {
+        caret.clearSelection();
+        insertText("  ");
+        caret.incCol(2);
+      } else if (character == DELETE) {
         deleteRight();
       } else if (character == BACKSPACE) {
         delete();
@@ -251,6 +255,21 @@ public class CodeEditor extends Widget {
       boolean repeat = false;
       boolean ctrl   = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
       boolean shift  = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)   || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
+      
+      if (ctrl) {
+        if (keycode == Keys.V) {
+          paste();
+          return true;
+        }
+        if (keycode == Keys.C || keycode == Keys.INSERT) {
+          copy();
+          return true;
+        }
+        if (keycode == Keys.X || keycode == Keys.DEL) {
+          cut();
+          return true;
+        }
+      }
       
       if (keycode == Keys.LEFT) {
         if (shift) {
@@ -430,21 +449,36 @@ public class CodeEditor extends Widget {
   }
 
   private void cut() {
-    // TODO Auto-generated method stub
-    
+    if (caret.haveSelection()) {
+      copy();
+      delete();
+    }
   }
 
   private void copy() {
-    // TODO Auto-generated method stub
+    String lineText  = getAllText();
+    int pos          = caret.getCaretPosition();
     
+    if (caret.haveSelection()) {
+      int startPos = caret.getSelectionCaretPosition();
+      
+      int from = Math.min(pos, startPos);
+      int to   = Math.max(pos, startPos);
+      
+      String copyText = lineText.substring(from, to);
+      clipboard.setContents(copyText);
+    }
   }
 
   private void paste() {
-    // TODO Auto-generated method stub
+    String content = clipboard.getContents();
     
+    if (content != null) {
+      insertText(content);
+      caret.moveToSelectionStart();
+      caret.clearSelection();
+    }
   }
-
-  
 
   public int xToCol(float x) {
     int c = (int) Math.floor((x - gutterWidth() - GUTTER_PADDING) / getFont().getSpaceWidth());
