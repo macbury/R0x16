@@ -91,6 +91,7 @@ public class CodeEditor extends Widget {
     styles.put(JavaScriptScanner.Kind.STRING, new Color(142.0f/255.0f, 198.0f/255.0f, 95.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.COMMENT, new Color(95.0f/255.0f, 90.0f/255.0f, 96.0f/255.0f, 1.0f));
     styles.put(JavaScriptScanner.Kind.NUMBER, new Color(127.0f/255.0f, 197.0f/255.0f, 120.0f/255.0f, 1.0f));
+    styles.put(JavaScriptScanner.Kind.SPECIAL_KEYWORD, new Color(252.0f/255.0f, 168.0f/255.0f, 98.0f/255.0f, 1.0f));
     shape     = new ShapeRenderer();
     this.text = "";
     this.parse(this.text);
@@ -105,10 +106,9 @@ public class CodeEditor extends Widget {
     scrollbar.setWidth(16);
     scrollbar.setValue(100);
     
-    this.scissors = new Rectangle();
+    this.scissors   = new Rectangle();
     this.clipBounds = new Rectangle(0,0,0,0);
   }
-  
   
   private void initializeKeyboard() {
     addListener(inputListener = new ClickListener() {
@@ -134,8 +134,7 @@ public class CodeEditor extends Widget {
         if (pointer == 0 && button != 0) return false;
         if (disabled) return true;
         caret.clearSelection();
-        caret.setCursorPosition(xToCol(x), yToRow(y));
-        caret.startSelection();
+        caret.setCursorPosition(xToCol(x) + caret.getColScrollPosition(), yToRow(y) + caret.getRowScrollPosition());
         Stage stage = getStage();
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
         Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
@@ -146,7 +145,14 @@ public class CodeEditor extends Widget {
         super.touchDragged(event, x, y, pointer);
         lastBlink = 0;
         cursorOn = false;
-        caret.setCursorPosition(xToCol(x), yToRow(y));
+        int col = xToCol(x) + caret.getColScrollPosition();
+        boolean moveLeft = col - caret.getCol() <= 0;
+        caret.setCursorPosition(col, yToRow(y) + caret.getRowScrollPosition());
+        if (moveLeft) {
+          updateScrollInLeftDirectionForCol();
+        } else {
+          updateScrollInRightDirectionForCol();
+        }
         caret.startSelection();
       }
       
@@ -189,7 +195,6 @@ public class CodeEditor extends Widget {
     return s;
   }
 
-
   protected boolean onKeyTyped(InputEvent event, char character) {
     if (disabled) return false;
     Stage stage = getStage();
@@ -206,6 +211,7 @@ public class CodeEditor extends Widget {
         caret.clearSelection();
         insertText(String.valueOf(character));
         caret.incCol(1);
+        updateScrollInLeftDirectionForCol();
       } else {
         return false;
       }
@@ -214,7 +220,6 @@ public class CodeEditor extends Widget {
     }
     return false;
   }
-
 
   protected boolean onKeyDown(InputEvent event, int keycode) {
     if (disabled) return false;
@@ -271,6 +276,7 @@ public class CodeEditor extends Widget {
           caret.clearSelection();
         }
         caret.moveRowUp();
+        updateScrollInRightDirectionForCol();
         repeat = true;
       }
       
@@ -281,6 +287,7 @@ public class CodeEditor extends Widget {
           caret.clearSelection();
         }
         caret.moveRowDown();
+        updateScrollInRightDirectionForCol();
         repeat = true;
       }
       
@@ -448,7 +455,7 @@ public class CodeEditor extends Widget {
       
       if (cursorRowStart == cursorRowEnd) {
         shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()) - xOffset, 
-            (sy + height) - (caret.getRow() + 1) * getLineHeight(), 
+            (sy + height) - (caret.getRow() - caret.getRowScrollPosition() + 1) * getLineHeight(), 
             ((cursorColEnd - cursorColStart) * getFont().getSpaceWidth()), 
             getLineHeight()
         );
@@ -456,22 +463,22 @@ public class CodeEditor extends Widget {
         int rowCount = Math.abs(cursorRowStart - cursorRowEnd) - 1;
         
         shape.rect(sx + gutterWidth() + GUTTER_PADDING + cursorColStart * font.getSpaceWidth(), 
-            (sy + height) - (cursorRowStart+1) * getLineHeight(), 
+            (sy + height) - (cursorRowStart+ 1 - caret.getRowScrollPosition()) * getLineHeight(), 
             width - gutterWidth() - GUTTER_PADDING - cursorColStart * font.getSpaceWidth(), 
             getLineHeight()
         );
         
         for (int i = 0; i < rowCount; i++) {
           shape.rect(sx + gutterWidth() + GUTTER_PADDING, 
-              (sy + height) - (cursorRowStart + i + 2) * getLineHeight(), 
+              (sy + height) - (cursorRowStart + i + 2 - caret.getRowScrollPosition()) * getLineHeight(), 
               width - gutterWidth() - GUTTER_PADDING, 
               getLineHeight()
           );
         }
         
         shape.rect(sx + gutterWidth() + GUTTER_PADDING, 
-            (sy + height) - (cursorRowEnd+1) * getLineHeight(), 
-            cursorColEnd * font.getSpaceWidth(), 
+            (sy + height) - (cursorRowEnd + 1 - caret.getRowScrollPosition()) * getLineHeight(), 
+            (cursorColEnd - caret.getColScrollPosition()) * font.getSpaceWidth(), 
             getLineHeight()
         );
       }
@@ -486,7 +493,7 @@ public class CodeEditor extends Widget {
       Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
       shape.begin(ShapeType.Filled);
       shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
-      shape.rect(sx, (sy + height) - (caret.getRow() + 1) * getLineHeight(), width, getLineHeight());
+      shape.rect(sx, (sy + height) - (caret.getRow() + 1 - caret.getRowScrollPosition()) * getLineHeight(), width, getLineHeight());
       shape.end();
       Gdx.gl.glDisable(GL10.GL_BLEND);
     }
@@ -495,8 +502,8 @@ public class CodeEditor extends Widget {
     renderBatch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
     
     
-    for (int y = fromLine; y < toLine; y++) {
-      Line line               = this.lines.get(y);
+    for (int y = 0; y < toLine - fromLine; y++) {
+      Line line               = this.lines.get(fromLine + y);
       float linePosY          = (sy + height + font.getDescent()) - y * getLineHeight();
       float lineElementX      = 0;
       
@@ -515,15 +522,15 @@ public class CodeEditor extends Widget {
     if (focused && !disabled) {
       blink();
       if (cursorOn && cursorPatch != null) {
-        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()) - xOffset, (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
+        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()) - xOffset, (sy + height) - (caret.getRow() - caret.getRowScrollPosition() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
       }
     }
 
     renderBatch.flush();
     ScissorStack.popScissors();
     
-    for (int y = fromLine; y < toLine; y++) {
-      String lineNumberString = Integer.toString(y+1);
+    for (int y = 0; y < toLine - fromLine; y++) {
+      String lineNumberString = Integer.toString(fromLine + y+1);
       float linePosY          = (sy + height + font.getDescent()) - y * getLineHeight();
       font.setColor(Color.WHITE);
       font.draw(renderBatch, lineNumberString, sx + gutterWidth() - font.getBounds(lineNumberString).width, linePosY);
@@ -534,6 +541,9 @@ public class CodeEditor extends Widget {
     scrollbar.setPosition(sx + getWidth(), sy);
     scrollbar.setHeight(height);
     
+    scrollbar.setRange(0, lines.size() - visibleLinesCount());
+    int scroll = (int) (scrollbar.getMaxValue() - scrollbar.getValue());
+    caret.setRowScrollPosition(scroll);
    // scrollbar.draw(renderBatch, parentAlpha);
   }
   

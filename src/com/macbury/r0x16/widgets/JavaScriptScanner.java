@@ -24,11 +24,13 @@ public class JavaScriptScanner {
         COMMENT,
         /** A javadoc tag inside a comment */
         COMMENT_TAG,
-        NUMBER
+        NUMBER,
+        SPECIAL_KEYWORD
     }
 
     private static final KeywordList KEYWORD_LIST = new KeywordList(
-            "function", "true", "false", "var", "for", "while", "if", "else", "null", "this", "new", "switch", "case", "break", "try", "catch", "do", "instanceof", "return", "throw", "typeof", "with");
+            "function", "true", "false", "var", "for", "while", "if", "else", "null", "this", "new", "switch", "case", "break", "try", "catch", "do", "instanceof", "return", "throw", "typeof", "with", "prototype");
+    private static final KeywordList SPECIAL_KEYWORD_LIST = new KeywordList("setup", "loop", "Engine");
 
     private final CharacterIterator iterator;
 
@@ -149,17 +151,23 @@ public class JavaScriptScanner {
             break;
           default:
             if(Character.isJavaIdentifierStart(ch)) {
-                iterator.setMarker(true);
-                iterator.advanceIdentifier();
-                if(iterator.isKeyword(KEYWORD_LIST)) {
-                    if(iterator.isMarkerAtStart()) {
-                        return Kind.KEYWORD;
-                    }
-                    iterator.rewindToMarker();
-                    return Kind.NORMAL;
-                } else if (Character.isDigit(ch)) {
-                  return Kind.NUMBER;
-                } 
+              iterator.setMarker(true);
+              iterator.advanceIdentifier();
+              if(iterator.isKeyword(KEYWORD_LIST)) {
+                if(iterator.isMarkerAtStart()) {
+                    return Kind.KEYWORD;
+                }
+                iterator.rewindToMarker();
+                return Kind.NORMAL;
+              } else if(iterator.isKeyword(SPECIAL_KEYWORD_LIST)) {
+                if(iterator.isMarkerAtStart()) {
+                  return Kind.SPECIAL_KEYWORD;
+                }
+                iterator.rewindToMarker();
+                return Kind.NORMAL;
+              } else if (Character.isDigit(ch)) {
+                return Kind.NUMBER;
+              } 
             }
             break;
         }
