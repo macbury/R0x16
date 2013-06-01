@@ -213,11 +213,11 @@ public class CodeEditor extends Widget {
     if (disabled) return false;
     Stage stage = getStage();
     if (stage != null && stage.getKeyboardFocus() == this) {
-      
-      if (character == BACKSPACE) {
+      if (character == DELETE) {
+        deleteRight();
+      } else if (character == BACKSPACE) {
         delete();
       } else if (character == ENTER_DESKTOP) {
-        caret.clearSelection();
         insertText("\n");
         caret.incRow();
         int spaces = caret.getPrevPadding();
@@ -229,7 +229,6 @@ public class CodeEditor extends Widget {
         caret.setCol(spaces);
         updateScrollInDownDirectionForRow();
       } else if (getFont().containsCharacter(character)) {
-        caret.clearSelection();
         insertText(String.valueOf(character));
         caret.incCol(1);
         updateScrollInLeftDirectionForCol();
@@ -370,8 +369,11 @@ public class CodeEditor extends Widget {
   }
   
   public void insertText(String ins) {
-    String lineText  = getAllText();
+    if (caret.haveSelection()) {
+      delete();
+    }
     
+    String lineText  = getAllText();
     int pos = caret.getCaretPosition();
     
     String finalText = lineText.substring(0, pos) + ins;
@@ -382,7 +384,11 @@ public class CodeEditor extends Widget {
     parse(finalText);
   }
   
-  private void delete() {
+  private void deleteRight() {
+    remove(1);
+  }
+  
+  private void remove(int i) {
     String lineText  = getAllText();
     int pos          = caret.getCaretPosition();
     
@@ -400,14 +406,27 @@ public class CodeEditor extends Widget {
       caret.clearSelection();
       parse(finalText);
     } else {
-      String finalText = lineText.substring(0, pos-1);
-      if (pos < lineText.length()) {
-        finalText += lineText.substring(pos, lineText.length());
+      String finalText = null;
+      if (i == -1) {
+        finalText = lineText.substring(0, pos + i);
+        if (pos < lineText.length()) {
+          finalText += lineText.substring(pos, lineText.length());
+        }
+        caret.moveOneCharLeft();
+      } else {
+        finalText = lineText.substring(0, pos);
+        if (pos + 1 < lineText.length()) {
+          finalText += lineText.substring(pos+ i, lineText.length());
+        }
+        //caret.moveOneCharRight();
       }
       
-      caret.moveOneCharLeft();
       parse(finalText);
     }
+  }
+  
+  private void delete() {
+    remove(-1);
   }
 
   private void cut() {
