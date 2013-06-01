@@ -12,6 +12,8 @@ public class Caret {
   private boolean haveSelection = false;
   private int selectionStartRow;
   private int selectionStartCol;
+  private int rowScrollPosition = 0;
+  private int colScrollPosition = 0;
   
   public Caret(ArrayList<Line> linesArray) {
     this.lines = linesArray;
@@ -330,5 +332,21 @@ public class Caret {
 
   public int getSelectionStartCol() {
     return selectionStartCol;
+  }
+
+  public int getRowScrollPosition() {
+    return rowScrollPosition;
+  }
+
+  public void setRowScrollPosition(int rowScrollPosition) {
+    this.rowScrollPosition = rowScrollPosition;
+  }
+
+  public int getColScrollPosition() {
+    return colScrollPosition;
+  }
+
+  public void setColScrollPosition(int colScrollPosition) {
+    this.colScrollPosition = colScrollPosition;
   }
 }

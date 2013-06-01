@@ -23,12 +23,12 @@ public class CodeEditorTest implements Screen {
     startGameButton.setWidth(120);
     startGameButton.setHeight(60);
 
-    stage.addActor( startGameButton );
+   //stage.addActor( startGameButton );
     
     CodeEditor textField = new CodeEditor(skin);
     textField.setText(Gdx.files.internal("assets/example.js").readString());
     textField.setX(30);
-    textField.setY(170);
+    textField.setY(40);
     textField.setWidth(320);
     textField.setHeight(240);
     

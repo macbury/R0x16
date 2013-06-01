@@ -28,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.FloatArray;
@@ -55,8 +56,7 @@ public class CodeEditor extends Widget {
   private ArrayList<Line> lines;
   boolean disabled;
   private String text           = "";
-  private int rowScrollPosition = 0;
-  private int colScrollPosition = 0;
+
   private Caret caret;
   private float blinkTime       = 0.32f;
   
@@ -70,6 +70,8 @@ public class CodeEditor extends Widget {
   float keyRepeatInitialTime  = 0.4f;
   float keyRepeatTime         = 0.1f;
   private Slider scrollbar;
+  private Rectangle scissors;
+  private Rectangle clipBounds;
   
   class KeyRepeatTask extends Task {
     int keycode;
@@ -102,12 +104,15 @@ public class CodeEditor extends Widget {
     scrollbar = new Slider(0, 100, 1, true, skin);
     scrollbar.setWidth(16);
     scrollbar.setValue(100);
+    
+    this.scissors = new Rectangle();
+    this.clipBounds = new Rectangle(0,0,0,0);
   }
   
   
   private void initializeKeyboard() {
     addListener(inputListener = new ClickListener() {
-
+      
       @Override
       public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         super.enter(event, x, y, pointer, fromActor);
@@ -213,11 +218,9 @@ public class CodeEditor extends Widget {
 
   protected boolean onKeyDown(InputEvent event, int keycode) {
     if (disabled) return false;
-    
-    final BitmapFont font = getFont();
-    lastBlink   = 0;
-    cursorOn    = false;
-    Stage stage = getStage();
+    lastBlink             = 0;
+    cursorOn              = false;
+    Stage stage           = getStage();
     
     if (stage != null && stage.getKeyboardFocus() == this) {
       boolean repeat = false;
@@ -237,6 +240,9 @@ public class CodeEditor extends Widget {
             caret.moveOneCharLeft();
           }
         }
+        
+        updateScrollInRightDirectionForCol();
+        
         repeat = true;
       }
       
@@ -253,6 +259,8 @@ public class CodeEditor extends Widget {
             caret.moveOneCharRight();
           }
         }
+        
+        updateScrollInLeftDirectionForCol();
         repeat = true;
       }
       
@@ -281,6 +289,7 @@ public class CodeEditor extends Widget {
           caret.startSelection();
         }
         caret.setColHome();
+        updateScrollInRightDirectionForCol();
       }
       
       if (keycode == Keys.END) {
@@ -288,6 +297,7 @@ public class CodeEditor extends Widget {
           caret.startSelection();
         }
         caret.setColEnd();
+        updateScrollInLeftDirectionForCol();
       }
       
       if (repeat && (!keyRepeatTask.isScheduled() || keyRepeatTask.keycode != keycode)) {
@@ -302,6 +312,20 @@ public class CodeEditor extends Widget {
     }
   }
   
+  private void updateScrollInRightDirectionForCol() {
+    if (caret.getCol() < caret.getColScrollPosition()) {
+      caret.setColScrollPosition(caret.getCol());
+    }
+  }
+
+
+  private void updateScrollInLeftDirectionForCol() {
+    if (caret.getCol() > visibleCharsCount()-2) {
+      caret.setColScrollPosition(caret.getCol() - visibleCharsCount()+1);
+    } else {
+      caret.setColScrollPosition(0);
+    }
+  }
   private void delete() {
     Line line       = caret.getCurrentLine();
     String lineText = line.getCachedFullText();
@@ -372,8 +396,17 @@ public class CodeEditor extends Widget {
     float sy = getY();
     float width = getWidth();
     float height = getHeight();
+
+    int fromLine = caret.getRowScrollPosition();
+    int toLine   = Math.min(fromLine + visibleLinesCount(), this.lines.size());
+    
+    int fromChar = caret.getColScrollPosition();
+    int toChar   = fromChar + visibleCharsCount();
+    
+    int xOffset = (int) (caret.getColScrollPosition() * font.getSpaceWidth());
     
     renderBatch.end();
+
     shape.setProjectionMatrix(renderBatch.getProjectionMatrix());
       
     shape.begin(ShapeType.Filled);
@@ -386,10 +419,15 @@ public class CodeEditor extends Widget {
     shape.rect(sx, sy, gutterWidth() + GUTTER_PADDING / 2 , height);
     shape.end();
     
-    shape.begin(ShapeType.Line);
+    /*shape.begin(ShapeType.Line);
     shape.setColor(0.3f, 0.3f, 0.3f, 1);
     shape.rect(sx, sy, width, height);
-    shape.end();
+    shape.end();*/
+    
+
+    clipBounds.set(sx+gutterWidth()+GUTTER_PADDING, sy, width-(gutterWidth()+GUTTER_PADDING), height);
+    ScissorStack.calculateScissors(stage.getCamera(), renderBatch.getTransformMatrix(), clipBounds, scissors);
+    ScissorStack.pushScissors(scissors);
     
     if (caret.haveSelection()) {
       int cursorRowStart = Math.min(caret.getSelectionStartRow(), caret.getRow());
@@ -409,7 +447,7 @@ public class CodeEditor extends Widget {
       shape.setColor(1.0f, 1.0f, 1.0f, 0.1f);
       
       if (cursorRowStart == cursorRowEnd) {
-        shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()), 
+        shape.rect(sx + gutterWidth() + ((cursorColStart+1) * getFont().getSpaceWidth()) - xOffset, 
             (sy + height) - (caret.getRow() + 1) * getLineHeight(), 
             ((cursorColEnd - cursorColStart) * getFont().getSpaceWidth()), 
             getLineHeight()
@@ -456,47 +494,46 @@ public class CodeEditor extends Widget {
     renderBatch.begin();
     renderBatch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
     
-    int fromLine = rowScrollPosition;
-    int toLine   = Math.min(fromLine + visibleLinesCount(), this.lines.size());
-    
-    int fromChar = colScrollPosition;
-    int toChar   = fromChar + visibleCharsCount();
     
     for (int y = fromLine; y < toLine; y++) {
       Line line               = this.lines.get(y);
       float linePosY          = (sy + height + font.getDescent()) - y * getLineHeight();
       float lineElementX      = 0;
       
-      String lineNumberString = Integer.toString(y+1);
-      font.setColor(Color.WHITE);
-      font.draw(renderBatch, lineNumberString, sx + gutterWidth() - font.getBounds(lineNumberString).width, linePosY);
-      
       for (int x = 0; x < line.size(); x++) {
         Element elem      = line.get(x);
         TextBounds bounds = font.getBounds(elem.text);
         font.setColor(styles.get(elem.kind));
-        font.draw(renderBatch, elem.text, sx + gutterWidth() + GUTTER_PADDING + lineElementX, linePosY );
+        font.draw(renderBatch, elem.text, sx + gutterWidth() + GUTTER_PADDING + lineElementX - xOffset, linePosY );
         
         lineElementX += bounds.width;
-        if (lineElementX > toChar) {
-          break;
-        }
+        //if (lineElementX > toChar) {
+        //  break;
+        //}
       }
     }
-    
-    font.setColor(Color.WHITE);
-    font.draw(renderBatch, "Row "+ caret.getRow() + " Col " + caret.getCol() + " Char " + String.valueOf(caret.getCurrentChar()), sx, sy - getLineHeight() + GUTTER_PADDING);
-    
     if (focused && !disabled) {
       blink();
       if (cursorOn && cursorPatch != null) {
-        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()), (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
+        cursorPatch.draw(renderBatch, sx + gutterWidth() + GUTTER_PADDING + ((caret.getCol()) * getFont().getSpaceWidth()) - xOffset, (sy + height) - (caret.getRow() + 1) * getLineHeight(), cursorPatch.getMinWidth(), getLineHeight());
       }
     }
+
+    renderBatch.flush();
+    ScissorStack.popScissors();
     
+    for (int y = fromLine; y < toLine; y++) {
+      String lineNumberString = Integer.toString(y+1);
+      float linePosY          = (sy + height + font.getDescent()) - y * getLineHeight();
+      font.setColor(Color.WHITE);
+      font.draw(renderBatch, lineNumberString, sx + gutterWidth() - font.getBounds(lineNumberString).width, linePosY);
+    }
     
+    font.setColor(Color.WHITE);
+    font.draw(renderBatch, "Row "+ caret.getRow() + " Col " + caret.getCol() + " Char " + String.valueOf(caret.getCurrentChar()) + " Scroll Col: " + caret.getColScrollPosition() + " Scroll Row: " + caret.getRowScrollPosition(), sx, sy - getLineHeight() + GUTTER_PADDING);
     scrollbar.setPosition(sx + getWidth(), sy);
     scrollbar.setHeight(height);
+    
    // scrollbar.draw(renderBatch, parentAlpha);
   }
   
