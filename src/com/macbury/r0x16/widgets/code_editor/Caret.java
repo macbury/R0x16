@@ -37,10 +37,17 @@ public class Caret {
   }
 
   public int getCol() {
+    if (col < 0) {
+      col = 0;
+    }
     return col;
   }
 
   public void setCol(int col) {
+    if (col < 0) {
+      col = 0;
+      Gdx.app.log(TAG, "Col is" + col);
+    }
     this.col = col;
     fixColBoundsValue();
   }
@@ -237,14 +244,12 @@ public class Caret {
       int width = c;
       for (int y = 0; y < r; y++) {
         line = getLineForRow(y);
-        width += line.textLenght();
+        width += line.textLenght()+1;
       }
       return width;
     }
   }
   
-
-
   public void setColHome() {
     setCol(0);
   }
@@ -347,6 +352,32 @@ public class Caret {
   }
 
   public void setColScrollPosition(int colScrollPosition) {
+    if (colScrollPosition < 0) {
+      this.colScrollPosition = 0;
+    }
     this.colScrollPosition = colScrollPosition;
+  }
+
+  public int getPrevPadding() {
+    if (getCol() > 0) {
+      Line prev = lines.get(getRow() - 1);
+      if (prev != null) {
+        return prev.getPadding();
+      } else {
+        return 0;
+      }
+    }
+    return 0;
+  }
+
+  public void removeLine(int row) {
+    this.lines.remove(row);
+  }
+
+  public void decRow() {
+    if (row > 0) {
+      this.row --;
+    }
+    
   }
 }

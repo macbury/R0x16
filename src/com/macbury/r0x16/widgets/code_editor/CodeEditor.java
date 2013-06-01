@@ -143,16 +143,26 @@ public class CodeEditor extends Widget {
       
       public void touchDragged (InputEvent event, float x, float y, int pointer) {
         super.touchDragged(event, x, y, pointer);
-        lastBlink = 0;
-        cursorOn = false;
-        int col = xToCol(x) + caret.getColScrollPosition();
+        lastBlink        = 0;
+        cursorOn         = false;
+        int col          = xToCol(x) + caret.getColScrollPosition();
+        int row          = yToRow(y) + caret.getRowScrollPosition();
         boolean moveLeft = col - caret.getCol() <= 0;
-        caret.setCursorPosition(col, yToRow(y) + caret.getRowScrollPosition());
+        boolean moveDown = row - caret.getRow() <= 0;
+        caret.setCursorPosition(col,row);
+        
         if (moveLeft) {
           updateScrollInLeftDirectionForCol();
         } else {
           updateScrollInRightDirectionForCol();
         }
+        
+        if (moveDown) {
+          updateScrollInDownDirectionForRow();
+        } else {
+          updateScrollInUpDirectionForRow();
+        }
+        
         caret.startSelection();
       }
       
@@ -173,14 +183,29 @@ public class CodeEditor extends Widget {
   }
 
   public void insertText(String ins) {
-    Line line       = caret.getCurrentLine();
-    String lineText = line.getCachedFullText();
-    String finalText = lineText.substring(0, caret.getCol()) + ins;
-    if (caret.getCol() < lineText.length()) {
-      finalText += lineText.substring(caret.getCol(), lineText.length());
+    String lineText  = getAllText();
+    
+    int pos = caret.getCaretPosition();
+    
+    String finalText = lineText.substring(0, pos) + ins;
+    if (pos < lineText.length()) {
+      finalText += lineText.substring(pos, lineText.length());
     }
-    line.setCachedFullText(finalText);
-    parse(buildStringFromLines());
+    
+    parse(finalText);
+  }
+
+  private String getAllText() {
+    String out = "";
+    for (int i = 0; i < this.lines.size(); i++) {
+      Line line = this.lines.get(i);
+      out += line.getCachedFullText();
+      if (i != this.lines.size() - 1) {
+        out += '\n';
+      }
+    }
+    
+    return out;
   }
 
   private String buildStringFromLines() {
@@ -206,7 +231,14 @@ public class CodeEditor extends Widget {
         caret.clearSelection();
         insertText("\n");
         caret.incRow();
+        int spaces = caret.getPrevPadding();
+        Gdx.app.log(TAG, "Spaces in last line: "+ spaces);
         caret.setCol(0);
+        for (int i = 0; i < spaces; i++) {
+          insertText(" ");
+        }
+        caret.setCol(spaces);
+        updateScrollInDownDirectionForRow();
       } else if (getFont().containsCharacter(character)) {
         caret.clearSelection();
         insertText(String.valueOf(character));
@@ -277,6 +309,7 @@ public class CodeEditor extends Widget {
         }
         caret.moveRowUp();
         updateScrollInRightDirectionForCol();
+        updateScrollInUpDirectionForRow();
         repeat = true;
       }
       
@@ -288,6 +321,7 @@ public class CodeEditor extends Widget {
         }
         caret.moveRowDown();
         updateScrollInRightDirectionForCol();
+        updateScrollInDownDirectionForRow();
         repeat = true;
       }
       
@@ -319,6 +353,18 @@ public class CodeEditor extends Widget {
     }
   }
   
+  private void updateScrollInUpDirectionForRow() {
+    if (caret.getRow() < caret.getRowScrollPosition()) {
+      caret.setRowScrollPosition(caret.getRow());
+    }
+  }
+
+  private void updateScrollInDownDirectionForRow() {
+    if (caret.getRow() >= visibleLinesCount()) {
+      caret.setRowScrollPosition(caret.getRow() + 1 - visibleLinesCount());
+    }
+  }
+
   private void updateScrollInRightDirectionForCol() {
     if (caret.getCol() < caret.getColScrollPosition()) {
       caret.setColScrollPosition(caret.getCol());
@@ -337,8 +383,14 @@ public class CodeEditor extends Widget {
     Line line       = caret.getCurrentLine();
     String lineText = line.getCachedFullText();
     int ex = caret.getCol();
-    line.setCachedFullText(lineText.substring(0, caret.getCol()-1) + lineText.substring(caret.getCol(), lineText.length()));
-    parse(buildStringFromLines());
+    
+    if (ex > 0 && ex < lineText.length()) {
+      line.setCachedFullText(lineText.substring(0, caret.getCol()-1) + lineText.substring(caret.getCol(), lineText.length()));
+      parse(buildStringFromLines());
+    } else {
+      caret.removeLine(caret.getRow());
+      caret.decRow();
+    }
   }
 
   private void cut() {
@@ -537,13 +589,13 @@ public class CodeEditor extends Widget {
     }
     
     font.setColor(Color.WHITE);
-    font.draw(renderBatch, "Row "+ caret.getRow() + " Col " + caret.getCol() + " Char " + String.valueOf(caret.getCurrentChar()) + " Scroll Col: " + caret.getColScrollPosition() + " Scroll Row: " + caret.getRowScrollPosition(), sx, sy - getLineHeight() + GUTTER_PADDING);
+    font.draw(renderBatch, "Row "+ caret.getRow() + " Col " + caret.getCol() + " Char " + String.valueOf(caret.getCurrentChar()) + " Scroll Col: " + caret.getColScrollPosition() + " Scroll Row: " + caret.getRowScrollPosition() + " Caret position: "+ caret.getCaretPosition(), sx, sy - getLineHeight() + GUTTER_PADDING);
     scrollbar.setPosition(sx + getWidth(), sy);
     scrollbar.setHeight(height);
     
-    scrollbar.setRange(0, lines.size() - visibleLinesCount());
+    //scrollbar.setRange(0, lines.size() - visibleLinesCount());
     int scroll = (int) (scrollbar.getMaxValue() - scrollbar.getValue());
-    caret.setRowScrollPosition(scroll);
+    //caret.setRowScrollPosition(scroll);
    // scrollbar.draw(renderBatch, parentAlpha);
   }
   
