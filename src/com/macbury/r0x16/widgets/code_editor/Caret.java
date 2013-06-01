@@ -380,4 +380,25 @@ public class Caret {
     }
     
   }
+
+  public void decCol() {
+    if (col > 0) {
+      col--;
+    }
+  }
+
+  public int getSelectionCaretPosition() {
+    return getCaretPositionFor(getSelectionStartRow(), getSelectionStartCol());
+  }
+
+  public void moveToSelectionStart() {
+    if (getSelectionStartRow() == getRow()) {
+      this.setRow(getSelectionStartRow());
+      this.setCol(Math.min(getSelectionStartCol(), getCol()));
+    } else if (getSelectionStartRow() < getRow()) {
+      this.setRow(getSelectionStartRow());
+      this.setCol(getSelectionStartCol());
+    }
+    
+  }
 }

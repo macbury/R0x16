@@ -182,18 +182,7 @@ public class CodeEditor extends Widget {
     });
   }
 
-  public void insertText(String ins) {
-    String lineText  = getAllText();
-    
-    int pos = caret.getCaretPosition();
-    
-    String finalText = lineText.substring(0, pos) + ins;
-    if (pos < lineText.length()) {
-      finalText += lineText.substring(pos, lineText.length());
-    }
-    
-    parse(finalText);
-  }
+  
 
   private String getAllText() {
     String out = "";
@@ -379,17 +368,45 @@ public class CodeEditor extends Widget {
       caret.setColScrollPosition(0);
     }
   }
-  private void delete() {
-    Line line       = caret.getCurrentLine();
-    String lineText = line.getCachedFullText();
-    int ex = caret.getCol();
+  
+  public void insertText(String ins) {
+    String lineText  = getAllText();
     
-    if (ex > 0 && ex < lineText.length()) {
-      line.setCachedFullText(lineText.substring(0, caret.getCol()-1) + lineText.substring(caret.getCol(), lineText.length()));
-      parse(buildStringFromLines());
+    int pos = caret.getCaretPosition();
+    
+    String finalText = lineText.substring(0, pos) + ins;
+    if (pos < lineText.length()) {
+      finalText += lineText.substring(pos, lineText.length());
+    }
+    
+    parse(finalText);
+  }
+  
+  private void delete() {
+    String lineText  = getAllText();
+    int pos          = caret.getCaretPosition();
+    
+    if (caret.haveSelection()) {
+      int startPos = caret.getSelectionCaretPosition();
+      
+      int from = Math.min(pos, startPos);
+      int to   = Math.max(pos, startPos);
+      
+      String finalText = lineText.substring(0, from);
+      if (pos < lineText.length()) {
+        finalText += lineText.substring(to, lineText.length());
+      }
+      caret.moveToSelectionStart();
+      caret.clearSelection();
+      parse(finalText);
     } else {
-      caret.removeLine(caret.getRow());
-      caret.decRow();
+      String finalText = lineText.substring(0, pos-1);
+      if (pos < lineText.length()) {
+        finalText += lineText.substring(pos, lineText.length());
+      }
+      
+      caret.moveOneCharLeft();
+      parse(finalText);
     }
   }
 
