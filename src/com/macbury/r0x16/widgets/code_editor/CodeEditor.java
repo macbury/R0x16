@@ -269,6 +269,25 @@ public class CodeEditor extends Widget {
           cut();
           return true;
         }
+        
+        if (keycode == Keys.A) {
+          caret.clearSelection();
+          caret.selectAll();
+          return true;
+        }
+
+      }
+  
+      if (keycode == Keys.PAGE_UP) {
+        pageUp();
+        updateScrollInUpDirectionForRow();
+        repeat = true;
+      }
+      
+      if (keycode == Keys.PAGE_DOWN) {
+        pageDown();
+        updateScrollInDownDirectionForRow();
+        repeat = true;
       }
       
       if (keycode == Keys.LEFT) {
@@ -360,6 +379,22 @@ public class CodeEditor extends Widget {
     }
   }
   
+  private void pageUp() {
+    int mv = caret.getRow() - 1 - visibleLinesCount();
+    if (mv < 0) {
+      mv = 0;
+    }
+    caret.setRow(mv);
+  }
+
+  private void pageDown() {
+    int mv = caret.getRow() - 1 + visibleLinesCount();
+    if (mv > this.lines.size() - 1) {
+      mv = this.lines.size() - 1;
+    }
+    caret.setRow(mv);
+  }
+
   private void updateScrollInUpDirectionForRow() {
     if (caret.getRow() < caret.getRowScrollPosition()) {
       caret.setRowScrollPosition(caret.getRow());
@@ -367,7 +402,7 @@ public class CodeEditor extends Widget {
   }
 
   private void updateScrollInDownDirectionForRow() {
-    if (caret.getRow() >= visibleLinesCount()) {
+    if (caret.getRow() >= caret.getRowScrollPosition() + visibleLinesCount()) {
       caret.setRowScrollPosition(caret.getRow() + 1 - visibleLinesCount());
     }
   }

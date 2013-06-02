@@ -411,4 +411,15 @@ public class Caret {
       moveOneCharRight();
     }
   }
+
+  public void selectAll() {
+    Line endLine = this.lines.get(this.lines.size() - 1);
+    if (endLine != null) {
+      haveSelection          = true;
+      this.selectionStartCol = 0;
+      this.selectionStartRow = 0;
+      this.setCol(endLine.textLenght());
+      this.setRow(this.lines.size() - 1);
+    }
+  }
 }
