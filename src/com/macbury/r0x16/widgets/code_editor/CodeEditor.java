@@ -475,7 +475,7 @@ public class CodeEditor extends Widget {
     
     if (content != null) {
       insertText(content);
-      caret.moveToSelectionStart();
+      caret.moveForwardByCharCount(content.length());
       caret.clearSelection();
     }
   }
