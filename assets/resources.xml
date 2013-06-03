@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <resource type="atlas" id="DEVELOPER_ATLAS">developer_textures</resource>
   <resource type="texture" id="CURSOR_ARROW">cursors/arrow.png</resource>
   <resource type="texture" id="CURSOR_SELECT">cursors/select.png</resource>
+  <resource type="theme" id="UI_SKIN">uiskin</resource>
   <resource type="theme" id="UI_SKIN">uiskin</resource>
   <resource type="font" id="CURRIER_NEW" size="16">Courier New.ttf</resource>
 </resources>

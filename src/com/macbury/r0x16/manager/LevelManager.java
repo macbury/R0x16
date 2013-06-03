@@ -47,4 +47,8 @@ public class LevelManager {
   private void setPsychicsManager(PsychicsManager psychicsManager) {
     this.psychicsManager = psychicsManager;
   }
+
+  public OrthographicCamera getCamera() {
+    return camera;
+  }
 }

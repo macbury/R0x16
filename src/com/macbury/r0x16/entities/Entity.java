@@ -1,14 +1,20 @@
 package com.macbury.r0x16.entities;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Pool.Poolable;
+import com.macbury.r0x16.manager.LevelManager;
 import com.macbury.r0x16.utils.Position;
 
-public class Entity implements Poolable  {
+public class Entity implements Poolable {
   private static final String TAG = "Entity";
   private Position position;
+  private LevelManager    level;
   private ArrayList<Component> components;
   private ArrayList<Component> renderComponents;
   private ArrayList<Component> updateComponents;
@@ -24,6 +30,7 @@ public class Entity implements Poolable  {
     Component component = null;
     try {
       component = componentKlass.newInstance();
+      component.setOwner(this);
       this.components.add(component);
       if (ComponentRenderInterface.class.isInstance(component)) {
         this.renderComponents.add(component);
@@ -80,11 +87,11 @@ public class Entity implements Poolable  {
     this.position = position;
   }
   
-  public void render() {
+  public void render(SpriteBatch batch) {
     for (Component component : renderComponents) {
       if (component.isEnabled()) {
         ComponentRenderInterface c = (ComponentRenderInterface)component;
-        c.render();
+        c.render(batch);
       }
     }
   }
@@ -97,4 +104,13 @@ public class Entity implements Poolable  {
       }
     }
   }
+
+  public LevelManager getLevel() {
+    return level;
+  }
+
+  public void setLevel(LevelManager level2) {
+    this.level = level2;
+  }
+
 }

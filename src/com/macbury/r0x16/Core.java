@@ -25,6 +25,7 @@ import com.macbury.r0x16.screens.LevelScreen;
 import com.macbury.r0x16.screens.LightTestScreen;
 
 public class Core extends Game {
+  public static boolean DEBUG = true;
   public final static String CURSOR_NORMAL = "CURSOR_ARROW";
   public final static String CURSOR_TEXT   = "CURSOR_SELECT";
   static Core _shared;
