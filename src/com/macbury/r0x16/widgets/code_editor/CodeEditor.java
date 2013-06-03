@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -28,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.FocusListener.FocusEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Clipboard;
@@ -111,8 +113,25 @@ public class CodeEditor extends Widget {
   }
   
   private void initializeKeyboard() {
+    
     addListener(inputListener = new ClickListener() {
       
+      @Override
+      public boolean handle(Event event) {
+        if (!FocusEvent.class.isInstance(event) && ((InputEvent)event).getType() == InputEvent.Type.scrolled) {
+          Gdx.app.log(TAG, "Scrolled!");
+          return true;
+        } else {
+          return super.handle(event);
+        }
+      }
+
+      @Override
+      public boolean scrolled(InputEvent event, float x, float y, int amount) {
+        Gdx.app.log(TAG, "Scrolled: " + amount);
+        return super.scrolled(event, x, y, amount);
+      }
+
       @Override
       public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         super.enter(event, x, y, pointer, fromActor);
@@ -143,29 +162,14 @@ public class CodeEditor extends Widget {
       
       public void touchDragged (InputEvent event, float x, float y, int pointer) {
         super.touchDragged(event, x, y, pointer);
-        lastBlink        = 0;
-        cursorOn         = false;
-        int col          = xToCol(x) + caret.getColScrollPosition();
-        int row          = yToRow(y) + caret.getRowScrollPosition();
-        boolean moveLeft = col - caret.getCol() <= 0;
-        boolean moveDown = row - caret.getRow() <= 0;
-        caret.setCursorPosition(col,row);
-        
-        if (moveLeft) {
-          updateScrollInLeftDirectionForCol();
-        } else {
-          updateScrollInRightDirectionForCol();
-        }
-        
-        if (moveDown) {
-          updateScrollInDownDirectionForRow();
-        } else {
-          updateScrollInUpDirectionForRow();
-        }
-        
-        caret.startSelection();
+        onTouchDraged(event, x,y, pointer);
       }
       
+      @Override
+      public void dragStop(InputEvent event, float x, float y, int pointer) {
+        super.dragStop(event, x, y, pointer);
+      }
+
       public boolean keyDown(InputEvent event, int keycode) {
         return onKeyDown(event, keycode);
       }
@@ -182,7 +186,33 @@ public class CodeEditor extends Widget {
     });
   }
 
-  
+  public void onTouchDraged(InputEvent event, float x, float y, int pointer) {
+    lastBlink        = 0;
+    cursorOn         = false;
+    int col          = xToCol(x) + caret.getColScrollPosition();
+    int row          = yToRow(y) + caret.getRowScrollPosition();
+    
+    int rd           = row - caret.getRow();
+    
+    boolean moveLeft = col - caret.getCol() <= 0;
+    caret.setCursorPosition(col,row);
+    
+    if (moveLeft) {
+      updateScrollInLeftDirectionForCol();
+    } else {
+      updateScrollInRightDirectionForCol();
+    }
+    
+    if (rd == 0) {
+      
+    } else if(rd < 0) {
+      updateScrollInDownDirectionForRow();
+    } else {
+      updateScrollInUpDirectionForRow();
+    }
+    
+    caret.startSelection();
+  }
 
   private String getAllText() {
     String out = "";
@@ -384,6 +414,7 @@ public class CodeEditor extends Widget {
     if (mv < 0) {
       mv = 0;
     }
+    caret.clearSelection();
     caret.setRow(mv);
   }
 
@@ -392,6 +423,7 @@ public class CodeEditor extends Widget {
     if (mv > this.lines.size() - 1) {
       mv = this.lines.size() - 1;
     }
+    caret.clearSelection();
     caret.setRow(mv);
   }
 
@@ -400,6 +432,7 @@ public class CodeEditor extends Widget {
       caret.setRowScrollPosition(caret.getRow());
     }
   }
+  
 
   private void updateScrollInDownDirectionForRow() {
     if (caret.getRow() >= caret.getRowScrollPosition() + visibleLinesCount()) {
@@ -412,8 +445,7 @@ public class CodeEditor extends Widget {
       caret.setColScrollPosition(caret.getCol());
     }
   }
-
-
+  
   private void updateScrollInLeftDirectionForCol() {
     if (caret.getCol() > visibleCharsCount()-2) {
       caret.setColScrollPosition(caret.getCol() - visibleCharsCount()+1);
@@ -444,7 +476,10 @@ public class CodeEditor extends Widget {
   
   private void remove(int i) {
     String lineText  = getAllText();
-    int pos          = caret.getCaretPosition();
+    if (lineText.length() == 0) {
+      return;
+    }
+    int pos          = Math.max(0, caret.getCaretPosition());
     
     if (caret.haveSelection()) {
       int startPos = caret.getSelectionCaretPosition();
@@ -477,6 +512,8 @@ public class CodeEditor extends Widget {
       
       parse(finalText);
     }
+    
+    this.updateScrollInUpDirectionForRow();
   }
   
   private void delete() {
