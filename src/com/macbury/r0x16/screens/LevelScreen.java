@@ -4,8 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.macbury.r0x16.Core;
+import com.macbury.r0x16.components.DynamicBodyComponent;
 import com.macbury.r0x16.components.SpriteComponent;
+import com.macbury.r0x16.components.StaticBodyComponent;
 import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.LevelManager;
 import com.macbury.r0x16.manager.ResourceManager;
@@ -16,12 +19,35 @@ public class LevelScreen implements Screen {
   
   public LevelScreen() {
     level      = new LevelManager("test.level");
-    Entity e   = level.getEntityManager().build();
-    
     TextureAtlas atlas = ResourceManager.shared().getAtlas("DEVELOPER_ATLAS");
-    SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
-    spriteComponent.setSprite(atlas.findRegion("devTrans"));
-    e.getPosition().x = 1;
+    
+    for (int i = 5; i < 21; i++) {
+      Entity e = level.getEntityManager().build();
+      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
+      spriteComponent.setTexture(atlas.findRegion("devTrans"));
+      e.getPosition().x = 64 * i;
+      e.getPosition().y = 300;
+      
+      StaticBodyComponent staticBodyComponent = (StaticBodyComponent)e.addComponent(StaticBodyComponent.class);
+    }
+    
+    for (int i = 0; i < 3; i++) {
+      Entity e = level.getEntityManager().build();
+      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
+      spriteComponent.setTexture(atlas.findRegion("devTrans"));
+      e.getPosition().x = 64 * i;
+      e.getPosition().y = 200;
+      
+      StaticBodyComponent staticBodyComponent = (StaticBodyComponent)e.addComponent(StaticBodyComponent.class);
+    }
+    
+    for (int i = 5; i < 13; i++) {
+      Entity e   = level.getEntityManager().build();
+      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
+      spriteComponent.setTexture(atlas.findRegion("devOrange"));
+      e.setPosition(i * 64 - 58, 700);
+      e.addComponent(DynamicBodyComponent.class);
+    }
     debugBatch = new SpriteBatch();
   }
   

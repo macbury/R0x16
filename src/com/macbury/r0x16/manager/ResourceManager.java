@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeBitmapFontData;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class ResourceManager {
@@ -31,6 +32,7 @@ public class ResourceManager {
   private Map<String, Skin> skinMap;
   private Map<String, BitmapFont> fonts;
   private Map<String, Texture> textures;
+  private Map<String, FixtureDef> materials;
   public static ResourceManager shared() {
     if (_shared == null) {
       _shared = new ResourceManager();
@@ -39,14 +41,15 @@ public class ResourceManager {
   }
   
   public ResourceManager() {
-    atlasMap = new HashMap<String, TextureAtlas>();
-    skinMap  = new HashMap<String, Skin>();
-    fonts    = new HashMap<String, BitmapFont>();
-    textures = new HashMap<String, Texture>();
+    atlasMap  = new HashMap<String, TextureAtlas>();
+    skinMap   = new HashMap<String, Skin>();
+    fonts     = new HashMap<String, BitmapFont>();
+    textures  = new HashMap<String, Texture>();
+    materials = new HashMap<String, FixtureDef>();
   }
   
   public void load() throws Exception {
-    File rawXml = Gdx.files.internal("assets/resources.xml").file();
+    File rawXml = Gdx.files.internal("assets/infinity.game").file();
     Gdx.app.log(TAG, "Loaded resources XML");
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder docBuilder               = null;
@@ -84,9 +87,21 @@ public class ResourceManager {
           addElementAsFont(resourceElement);
         } else if (type.equals("texture")) {
           addElementAsTexture(resourceElement);
+        } else if (type.equals("material")) {
+          addElementAsMaterial(resourceElement);
         }
       }
     }
+  }
+
+  private void addElementAsMaterial(Element resourceElement) {
+    String id              = resourceElement.getAttribute("id");
+    FixtureDef fixtureDef  = new FixtureDef();
+    fixtureDef.density     = Float.parseFloat(resourceElement.getAttribute("density"));
+    fixtureDef.friction    = Float.parseFloat(resourceElement.getAttribute("friction"));
+    fixtureDef.restitution = Float.parseFloat(resourceElement.getAttribute("restitution"));
+    this.materials.put(id, fixtureDef);
+    Gdx.app.log(TAG, "Loading material: " + id);
   }
 
   private void addElementAsTexture(Element resourceElement) {
@@ -127,7 +142,11 @@ public class ResourceManager {
     Gdx.app.log(TAG, "Loading: " + id + " from " + path);
     atlasMap.put(id, new TextureAtlas( Gdx.files.internal( path ) ) );
   }
-
+  
+  public FixtureDef getFixtureDef(String id) {
+    return this.materials.get(id);
+  }
+  
   public TextureAtlas getAtlas(String id) {
     return this.atlasMap.get(id);
   }

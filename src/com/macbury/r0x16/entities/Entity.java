@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.macbury.r0x16.manager.LevelManager;
+import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.utils.Position;
 
 public class Entity implements Poolable {
@@ -18,12 +21,17 @@ public class Entity implements Poolable {
   private ArrayList<Component> components;
   private ArrayList<Component> renderComponents;
   private ArrayList<Component> updateComponents;
+  private int width;
+  private int height;
+  private Vector3 positionCache;
+  private float rotation = 0.0f;
   
   public Entity() {
-    this.position         = new Position();
-    this.components       = new ArrayList<Component>();
-    this.renderComponents = new ArrayList<Component>();
-    this.updateComponents = new ArrayList<Component>();
+    this.position           = new Position();
+    this.components         = new ArrayList<Component>();
+    this.renderComponents   = new ArrayList<Component>();
+    this.updateComponents   = new ArrayList<Component>();
+    this.positionCache      = new Vector3();
   }
   
   public Component addComponent(Class<? extends Component> componentKlass) {
@@ -38,6 +46,7 @@ public class Entity implements Poolable {
       if (ComponentUpdateInterface.class.isInstance(component)) {
         this.updateComponents.add(component);
       }
+      component.setup();
     } catch (InstantiationException | IllegalAccessException e) {
       e.printStackTrace();
     }
@@ -112,5 +121,61 @@ public class Entity implements Poolable {
   public void setLevel(LevelManager level2) {
     this.level = level2;
   }
+  
+  public Vector3 getRightBottomPoint() {
+    this.positionCache.set(getPosition());
+    this.positionCache.add(getWidth(), getHeight(), getPosition().z);
+    return this.positionCache;
+  }
+  
+  public int getWidth() {
+    return width;
+  }
 
+  public void setWidth(int width) {
+    this.width = width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
+  }
+
+  public boolean visibleByCamera(OrthographicCamera camera) {
+    return camera.frustum.pointInFrustum(getPosition()) || camera.frustum.pointInFrustum(getRightBottomPoint());
+  }
+
+  public void setPositionInMeters(float x, float y) {
+    setPosition(x / PsychicsManager.WORLD_TO_BOX, y / PsychicsManager.WORLD_TO_BOX);
+  }
+
+  public void setPosition(float x, float y) {
+    this.position.x = x;
+    this.position.y = y;
+  }
+
+  public void setRotation(float angle) {
+    this.rotation = angle;
+  }
+
+  public float getRotation() {
+    return this.rotation;
+  }
+  
+  public float getCenterPositionX() {
+    return this.position.x + this.getWidth() / 2;
+  }
+  
+  public float getCenterPositionY() {
+    return this.position.y + this.getHeight() / 2;
+  }
+
+  public void setCenterPosition(float x, float y) {
+    this.position.x = Math.round(x - this.getWidth() / 2);
+    this.position.y = Math.round(y - this.getHeight() / 2);
+  }
+  
 }

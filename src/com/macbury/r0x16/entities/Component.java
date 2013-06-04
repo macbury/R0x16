@@ -19,4 +19,6 @@ public abstract class Component {
   public void setOwner(Entity owner) {
     this.owner = owner;
   }
+
+  public abstract void setup();
 }

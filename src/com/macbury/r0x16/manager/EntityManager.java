@@ -35,7 +35,7 @@ public class EntityManager extends ArrayList<Entity> {
     renderCount               = 0;
     for (int i = 0; i < this.size(); i++) {
       Entity e = this.get(i);
-      if (camera.frustum.pointInFrustum(e.getPosition())) {
+      if (e.visibleByCamera(camera)) {
         e.render(entityBatch);
         renderCount++;
       }

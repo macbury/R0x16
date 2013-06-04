@@ -30,6 +30,7 @@ public class LevelManager {
   
   public void update(float delta) {
     entityManager.update(delta);
+    psychicsManager.update(delta);
   }
 
   public EntityManager getEntityManager() {
