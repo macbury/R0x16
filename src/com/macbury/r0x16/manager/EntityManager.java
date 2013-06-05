@@ -28,6 +28,13 @@ public class EntityManager extends ArrayList<Entity> {
     return e;
   }
   
+  public Entity build(String id) {
+    Entity e = PrefabManager.shared().build(id);
+    e.setLevel(level);
+    this.add(e);
+    return e;
+  }
+  
   public void render() {
     OrthographicCamera camera = level.getCamera();
     entityBatch.setProjectionMatrix(camera.combined);

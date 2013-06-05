@@ -1,5 +1,7 @@
 package com.macbury.r0x16.entities;
 
+import java.util.Map;
+
 public abstract class Component {
   private boolean enabled = true;
   private Entity owner;
@@ -21,6 +23,6 @@ public abstract class Component {
   }
 
   public abstract void setup();
-
   public abstract void reset();
+  public abstract void configure(Map<String, String> map);
 }

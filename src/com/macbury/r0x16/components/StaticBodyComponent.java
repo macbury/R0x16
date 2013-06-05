@@ -1,5 +1,7 @@
 package com.macbury.r0x16.components;
 
+import java.util.Map;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -35,6 +37,12 @@ public class StaticBodyComponent extends Component {
 
   @Override
   public void reset() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void configure(Map<String, String> map) {
     // TODO Auto-generated method stub
     
   }

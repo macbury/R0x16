@@ -42,11 +42,8 @@ public class LevelScreen implements Screen {
     }
     
     for (int i = 5; i < 13; i++) {
-      Entity e   = level.getEntityManager().build();
-      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
-      spriteComponent.setTexture(atlas.findRegion("devOrange"));
+      Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64 - 58, 700);
-      e.addComponent(DynamicBodyComponent.class);
     }
     debugBatch = new SpriteBatch();
   }

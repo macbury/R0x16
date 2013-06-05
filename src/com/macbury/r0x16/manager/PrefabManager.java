@@ -11,10 +11,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Pool;
+import com.macbury.r0x16.entities.Component;
+import com.macbury.r0x16.entities.Entity;
 
 public class PrefabManager {
   private static PrefabManager _shared;
@@ -67,8 +71,8 @@ public class PrefabManager {
   }
 
   private void addPrefab(Element element) {
-    PrefabFactor factor = new PrefabFactor();
     String id           = element.getAttribute("id");
+    PrefabFactor factor = new PrefabFactor(id);
     Gdx.app.log(TAG, "Loading prefab: "+ id);
     
     NodeList listComponents = element.getElementsByTagName("component");
@@ -76,9 +80,37 @@ public class PrefabManager {
     
     for (int i = 0; i < componentCount; i++) {
       Element componentElement = (Element) listComponents.item(i);
-      Gdx.app.log(TAG, componentElement.getAttribute("type"));
+      try {
+        String componentName                  = componentElement.getAttribute("type");
+        Class<? extends Component> component  = (Class<? extends Component>)Class.forName("com.macbury.r0x16.components."+componentName);
+        NamedNodeMap attr                     = componentElement.getAttributes();
+        HashMap<String, String> options       = new HashMap<String, String>();
+        
+        for (int j = 0; j < attr.getLength(); j++) {
+          Node node = attr.item(j);
+          options.put(node.getNodeName(), node.getTextContent());
+        }
+        factor.getComponents().put(component, options);
+        
+      } catch (ClassNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      
     }
-    
     this.prefabs.put(id, factor);
   }
+  
+  public Entity build(String id) {
+    PrefabFactor factor = this.prefabs.get(id);
+    Entity e            = new Entity();
+    
+    for (Class<? extends Component> componentKlass : factor.getComponents().keySet()) {
+      Component component = e.addComponent(componentKlass);
+      component.configure( factor.getComponents().get(componentKlass) );
+    }
+    
+    return e;
+  }
+
 }

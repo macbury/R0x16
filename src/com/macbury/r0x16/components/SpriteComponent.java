@@ -1,7 +1,10 @@
 package com.macbury.r0x16.components;
 
+import java.util.Map;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.macbury.r0x16.entities.Component;
@@ -41,5 +44,11 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
   public void reset() {
     // TODO Auto-generated method stub
     
+  }
+
+  @Override
+  public void configure(Map<String, String> map) {
+    TextureAtlas atlas = ResourceManager.shared().getAtlas(map.get("atlas"));
+    setTexture(atlas.findRegion(map.get("region")));
   }
 }
