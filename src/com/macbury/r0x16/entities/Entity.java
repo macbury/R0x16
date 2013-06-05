@@ -39,6 +39,7 @@ public class Entity implements Poolable {
   
   public Component addComponent(Class<? extends Component> componentKlass) {
     Component component = null;
+    requiredSetup = true;
     try {
       component = componentKlass.newInstance();
       component.setOwner(this);
@@ -49,7 +50,7 @@ public class Entity implements Poolable {
       if (ComponentUpdateInterface.class.isInstance(component)) {
         this.updateComponents.add(component);
       }
-      requiredSetup = true;
+      
     } catch (InstantiationException | IllegalAccessException e) {
       e.printStackTrace();
     }

@@ -33,7 +33,7 @@ public class LightTestScreen implements Screen {
     world = new World(new Vector2(0, -10), true);
     
     
-    RayHandler.setColorPrecisionMediump();
+    //RayHandler.setColorPrecisionMediump();
     RayHandler.setGammaCorrection(true);
     rayHandler = new RayHandler(world);
     rayHandler.setAmbientLight(0.0f);
@@ -41,7 +41,7 @@ public class LightTestScreen implements Screen {
     rayHandler.setBlur(true);
     rayHandler.setBlurNum(1);
     rayHandler.setShadows(true);
-    rayHandler.setAmbientLight(0.0f,0.6f,0.6f,0.1f);
+    rayHandler.setAmbientLight(0.6f,0.6f,0.6f,1f);
     
     camera.update(true);
     

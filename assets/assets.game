@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <resource type="atlas" id="DEVELOPER_ATLAS">developer_textures</resource>
+  <resource type="atlas"   id="DEVELOPER_ATLAS">developer_textures</resource>
   <resource type="texture" id="CURSOR_ARROW">cursors/arrow.png</resource>
   <resource type="texture" id="CURSOR_SELECT">cursors/select.png</resource>
-  <resource type="theme" id="UI_SKIN">uiskin</resource>
-  <resource type="font" id="CURRIER_NEW" size="16">Courier New.ttf</resource>
+  <resource type="theme"   id="UI_SKIN">uiskin</resource>
+  <resource type="font"    id="CURRIER_NEW" size="16">Courier New.ttf</resource>
   
-  <resource type="material" id="CUBE" density="1" friction="0.5" restitution="0.1" />
-  <resource type="material" id="BOUNCY_BALL" density="0.5" friction="0.5" restitution="0.9" />
+  <resource type="material" id="CUBE"        density="1"   friction="0.5" restitution="0.1" />
+  <resource type="material" id="BOUNCY_CUBE" density="0.5" friction="1"   restitution="0.9" />
 </resources>

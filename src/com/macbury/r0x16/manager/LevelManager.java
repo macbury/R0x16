@@ -13,7 +13,7 @@ public class LevelManager {
     Gdx.app.log(TAG, "Loading level: " + filename);
     camera        = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     camera.position.set(camera.viewportWidth * .5f, camera.viewportHeight * .5f, 0f);  
-    camera.update();
+    camera.update(true);
     
     setEntityManager(new EntityManager(this));
     setPsychicsManager(new PsychicsManager(this));
@@ -24,13 +24,15 @@ public class LevelManager {
   }
   
   public void render() {
-    camera.update();
     entityManager.render();
+    psychicsManager.renderLights();
   }
   
   public void update(float delta) {
+    camera.update();
     entityManager.update(delta);
     psychicsManager.update(delta);
+    camera.position.x += delta * 30.0f;
   }
 
   public EntityManager getEntityManager() {

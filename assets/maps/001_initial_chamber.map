@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<map>
+  <entities>
+    <entity id="entity_0001" prefab="CUBE" x="30" y="30" rotation="0" />
+  </entites>
+</map>

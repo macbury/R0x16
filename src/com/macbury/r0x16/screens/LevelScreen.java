@@ -1,9 +1,14 @@
 package com.macbury.r0x16.screens;
 
+import box2dLight.Light;
+import box2dLight.PointLight;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.macbury.r0x16.Core;
 import com.macbury.r0x16.components.DynamicBodyComponent;
@@ -20,13 +25,13 @@ public class LevelScreen implements Screen {
   public LevelScreen() {
     level      = new LevelManager("test.level");
     
-    for (int i = 5; i < 21; i++) {
+    for (int i = 5; i < 24; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
       e.getPosition().y = 300;
     }
     
-    for (int i = 0; i < 3; i++) {
+    for (int i = -1; i < 4; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
       e.getPosition().y = 200;
@@ -36,18 +41,25 @@ public class LevelScreen implements Screen {
       Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64 - 58, 700);
     }
+    for (int i = 12; i < 16; i++) {
+      Entity e   = level.getEntityManager().build("BOUNCY_CUBE");
+      e.setPosition(i * 64 - 53, 500);
+    }
+    
+    Entity e   = level.getEntityManager().build("LIGHT_CUBE");
+    e.getPosition().x = 400;
+    e.getPosition().y = 900;
     debugBatch = new SpriteBatch();
   }
   
   @Override
   public void render(float delta) {
+    level.update(delta);
     level.render();
     
     if (Core.DEBUG) {
       renderDebug();
     }
-    
-    level.update(delta);
   }
 
   private void renderDebug() {

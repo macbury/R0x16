@@ -91,7 +91,7 @@ public class PrefabManager {
           options.put(node.getNodeName(), node.getTextContent());
         }
         factor.getComponents().put(component, options);
-        
+        factor.getComponentsOrderList().add(component);
       } catch (ClassNotFoundException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -105,7 +105,7 @@ public class PrefabManager {
     PrefabFactor factor = this.prefabs.get(id);
     Entity e            = new Entity();
     
-    for (Class<? extends Component> componentKlass : factor.getComponents().keySet()) {
+    for (Class<? extends Component> componentKlass : factor.getComponentsOrderList()) {
       Component component = e.addComponent(componentKlass);
       component.configure( factor.getComponents().get(componentKlass) );
     }

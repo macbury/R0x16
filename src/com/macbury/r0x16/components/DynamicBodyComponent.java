@@ -38,7 +38,6 @@ public class DynamicBodyComponent extends Component {
     this.body.setUserData(owner);
   }
 
-
   @Override
   public void reset() {
     body.resetMassData();
@@ -80,6 +79,11 @@ public class DynamicBodyComponent extends Component {
 
   public void setFixtureDef(FixtureDef fixtureDef) {
     this.fixtureDef = fixtureDef;
+  }
+
+  public Body getBody() {
+    // TODO Auto-generated method stub
+    return body;
   }
 
 }
