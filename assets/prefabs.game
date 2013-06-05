@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <prefabs>
-  <prefab id="LIGHT_CUBE">
-    <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devTrans" />
-    <component type="DynamicBodyComponent" material="BOUNCY_CUBE" />
-    <component type="LightComponent" />
+  <prefab id="LIGHT_BALL">
+    <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="ball" />
+    <component type="BallDynamicBodyComponent" material="BOUNCY_CUBE" />
+    <component type="PointLightComponent"      static="false" distance="10" red="1.0" green="1.0" blue="1.0" alpha="0.7" />
   </prefab>
 
   <prefab id="CUBE">

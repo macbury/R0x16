@@ -46,9 +46,11 @@ public class LevelScreen implements Screen {
       e.setPosition(i * 64 - 53, 500);
     }
     
-    Entity e   = level.getEntityManager().build("LIGHT_CUBE");
-    e.getPosition().x = 400;
-    e.getPosition().y = 900;
+    for (int i = 7; i < 13; i++) {
+      Entity e   = level.getEntityManager().build("LIGHT_BALL");
+      e.getPosition().x = i * 64;
+      e.getPosition().y = 500;
+    }
     debugBatch = new SpriteBatch();
   }
   

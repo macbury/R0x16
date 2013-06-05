@@ -60,7 +60,7 @@ public class DynamicBodyComponent extends Component {
   }
 
 
-  private Shape getShape() {
+  protected Shape getShape() {
     Entity owner = getOwner();
     
     float width  = Math.round(owner.getWidth() * PsychicsManager.WORLD_TO_BOX / 2);

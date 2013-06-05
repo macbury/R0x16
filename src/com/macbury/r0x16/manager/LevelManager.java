@@ -32,7 +32,6 @@ public class LevelManager {
     camera.update();
     entityManager.update(delta);
     psychicsManager.update(delta);
-    camera.position.x += delta * 30.0f;
   }
 
   public EntityManager getEntityManager() {

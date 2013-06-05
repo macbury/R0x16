@@ -40,7 +40,7 @@ public class PsychicsManager {
     world         = new World(new Vector2(0, GRAVITY),true);
     //Gdx.app.log(TAG, "Setting lights FBO: "+Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
     rayHandler    = new RayHandler(world);
-    rayHandler.setAmbientLight(0.0f,0.0f,0.0f,0.1f);
+    rayHandler.setAmbientLight(0.0f,0.0f,0.0f,0.6f);
     OrthographicCamera camera = level.getCamera();
     boxCamera     = new OrthographicCamera();
     boxCamera.setToOrtho(false, camera.viewportWidth * WORLD_TO_BOX, camera.viewportHeight * WORLD_TO_BOX);
