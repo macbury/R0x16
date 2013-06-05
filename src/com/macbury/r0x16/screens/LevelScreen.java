@@ -19,26 +19,17 @@ public class LevelScreen implements Screen {
   
   public LevelScreen() {
     level      = new LevelManager("test.level");
-    TextureAtlas atlas = ResourceManager.shared().getAtlas("DEVELOPER_ATLAS");
     
     for (int i = 5; i < 21; i++) {
-      Entity e = level.getEntityManager().build();
-      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
-      spriteComponent.setTexture(atlas.findRegion("devTrans"));
+      Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
       e.getPosition().y = 300;
-      
-      StaticBodyComponent staticBodyComponent = (StaticBodyComponent)e.addComponent(StaticBodyComponent.class);
     }
     
     for (int i = 0; i < 3; i++) {
-      Entity e = level.getEntityManager().build();
-      SpriteComponent spriteComponent = (SpriteComponent)e.addComponent(SpriteComponent.class);
-      spriteComponent.setTexture(atlas.findRegion("devTrans"));
+      Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
       e.getPosition().y = 200;
-      
-      StaticBodyComponent staticBodyComponent = (StaticBodyComponent)e.addComponent(StaticBodyComponent.class);
     }
     
     for (int i = 5; i < 13; i++) {

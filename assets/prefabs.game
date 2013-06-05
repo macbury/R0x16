@@ -4,4 +4,9 @@
     <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devBlue" />
     <component type="DynamicBodyComponent" material="CUBE" />
   </prefab>
+  
+  <prefab id="GROUND">
+    <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devTrans" />
+    <component type="StaticBodyComponent" />
+  </prefab>
 </prefabs>
