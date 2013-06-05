@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.macbury.r0x16.manager.PrefabManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.screens.CodeEditorTest;
 import com.macbury.r0x16.screens.LevelScreen;
@@ -41,6 +42,7 @@ public class Core extends Game {
   public void create() {
     try {
       ResourceManager.shared().load();
+      PrefabManager.shared().load();
     } catch (Exception e) {
       e.printStackTrace();
     }

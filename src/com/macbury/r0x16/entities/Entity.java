@@ -21,6 +21,8 @@ public class Entity implements Poolable {
   private ArrayList<Component> components;
   private ArrayList<Component> renderComponents;
   private ArrayList<Component> updateComponents;
+  
+  private boolean requiredSetup = true;
   private int width;
   private int height;
   private Vector3 positionCache;
@@ -32,6 +34,7 @@ public class Entity implements Poolable {
     this.renderComponents   = new ArrayList<Component>();
     this.updateComponents   = new ArrayList<Component>();
     this.positionCache      = new Vector3();
+    requiredSetup           = true;
   }
   
   public Component addComponent(Class<? extends Component> componentKlass) {
@@ -46,7 +49,7 @@ public class Entity implements Poolable {
       if (ComponentUpdateInterface.class.isInstance(component)) {
         this.updateComponents.add(component);
       }
-      component.setup();
+      requiredSetup = true;
     } catch (InstantiationException | IllegalAccessException e) {
       e.printStackTrace();
     }
@@ -83,9 +86,10 @@ public class Entity implements Poolable {
   @Override
   public void reset() {
     Gdx.app.log(TAG, "Reseting entity");
-    this.components.clear();
-    this.renderComponents.clear();
-    this.updateComponents.clear();
+    for (Component component : this.components) {
+      component.reset();
+    }
+    requiredSetup = true;
   }
   
   public Position getPosition() {
@@ -111,6 +115,13 @@ public class Entity implements Poolable {
         ComponentUpdateInterface c = (ComponentUpdateInterface)component;
         c.update(delta);
       }
+    }
+    
+    if (requiredSetup) {
+      for (Component component : this.components) {
+        component.setup();
+      }
+      requiredSetup = false;
     }
   }
 

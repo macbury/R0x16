@@ -21,4 +21,6 @@ public abstract class Component {
   }
 
   public abstract void setup();
+
+  public abstract void reset();
 }

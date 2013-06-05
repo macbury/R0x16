@@ -36,4 +36,10 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
     // TODO Auto-generated method stub
     
   }
+
+  @Override
+  public void reset() {
+    // TODO Auto-generated method stub
+    
+  }
 }

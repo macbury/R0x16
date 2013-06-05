@@ -49,7 +49,7 @@ public class ResourceManager {
   }
   
   public void load() throws Exception {
-    File rawXml = Gdx.files.internal("assets/infinity.game").file();
+    File rawXml = Gdx.files.internal("assets/assets.game").file();
     Gdx.app.log(TAG, "Loaded resources XML");
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder docBuilder               = null;
@@ -72,7 +72,7 @@ public class ResourceManager {
     
     NodeList listResources = doc.getElementsByTagName("resource");
     int totalResources = listResources.getLength();
-    Gdx.app.log(TAG, "Parsed xml found: " + totalResources);
+    Gdx.app.log(TAG, "Resources to parse found: " + totalResources);
     
     for(int resourceIdx = 0; resourceIdx < totalResources; resourceIdx++){
       Node resourceNode = listResources.item(resourceIdx);
@@ -144,6 +144,7 @@ public class ResourceManager {
   }
   
   public FixtureDef getFixtureDef(String id) {
+    FixtureDef def = this.materials.get(id);
     return this.materials.get(id);
   }
   

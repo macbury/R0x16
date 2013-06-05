@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefabs>
+  <prefab id="CUBE">
+    <component type="SpriteComponent" atlas="DEVELOPER_ATLAS" region="devOrange" />
+    <component type="DynamicBodyComponent" material="CUBE" />
+  </prefab>
+</prefabs>

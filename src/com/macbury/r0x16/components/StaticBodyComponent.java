@@ -32,6 +32,10 @@ public class StaticBodyComponent extends Component {
     shape.dispose();
     this.body.setUserData(owner);
   }
-  
-  
+
+  @Override
+  public void reset() {
+    // TODO Auto-generated method stub
+    
+  }
 }

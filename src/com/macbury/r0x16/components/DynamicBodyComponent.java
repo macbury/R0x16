@@ -45,4 +45,11 @@ public class DynamicBodyComponent extends Component {
     this.body.setUserData(owner);
   }
 
+
+  @Override
+  public void reset() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }
