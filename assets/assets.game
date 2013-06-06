@@ -7,5 +7,5 @@
   <resource type="font"    id="CURRIER_NEW" size="16">Courier New.ttf</resource>
   
   <resource type="material" id="CUBE"        density="1"   friction="0.5" restitution="0.1" />
-  <resource type="material" id="BOUNCY_CUBE" density="0.5" friction="1"   restitution="0.9" />
+  <resource type="material" id="BOUNCY_CUBE" density="2" friction="1"   restitution="0.9" />
 </resources>

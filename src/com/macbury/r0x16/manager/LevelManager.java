@@ -8,7 +8,6 @@ public class LevelManager {
   private EntityManager entityManager;
   private PsychicsManager psychicsManager;
   private OrthographicCamera camera;
-  
   public LevelManager(String filename) {
     Gdx.app.log(TAG, "Loading level: " + filename);
     camera        = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -25,7 +24,7 @@ public class LevelManager {
   
   public void render() {
     entityManager.render();
-    psychicsManager.renderLights();
+    psychicsManager.render();
   }
   
   public void update(float delta) {

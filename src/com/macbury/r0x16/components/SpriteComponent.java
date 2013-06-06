@@ -21,7 +21,7 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
       Position pos = getOwner().getPosition();
       this.sprite.setPosition(pos.x, pos.y);
       this.sprite.setRotation(getOwner().getRotation());
-      this.sprite.draw(batch);
+      //this.sprite.draw(batch);
       //ResourceManager.shared().getFont("CURRIER_NEW").draw(batch, pos.x+"x"+pos.y, pos.x, pos.y);
       //batch.draw(region, pos.x, pos.y, originX, originY, width, height, scaleX, scaleY, rotation)
     }

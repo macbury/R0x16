@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.World;
 import com.macbury.r0x16.entities.Entity;
@@ -33,9 +34,12 @@ public class PsychicsManager {
   private float psychAccumulator                     = 0.0f;
   private LevelManager level;
   private RayHandler rayHandler;
-  
+  private Box2DDebugRenderer debugRender;
   public PsychicsManager(LevelManager levelManager) {
     Gdx.app.log(TAG, "Initializing new PsychicsManager");
+    
+    debugRender   = new Box2DDebugRenderer();
+    
     this.level    = levelManager;
     world         = new World(new Vector2(0, GRAVITY),true);
     //Gdx.app.log(TAG, "Setting lights FBO: "+Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
@@ -81,9 +85,6 @@ public class PsychicsManager {
     updateRayCamera();
   }
   
-  public void renderLights() {
-    rayHandler.render();
-  }
   
   public World getWorld() {
     return world;
@@ -91,5 +92,11 @@ public class PsychicsManager {
   
   public RayHandler getLight() {
     return rayHandler;
+  }
+
+  public void render() {
+    rayHandler.render();
+    
+    debugRender.render( getWorld(), boxCamera.combined );
   }
 }

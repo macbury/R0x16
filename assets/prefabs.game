@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <prefabs>
+  <prefab id="PLAYER">
+    <component type="PlayerComponent" />
+  </prefab>
+
   <prefab id="LIGHT_BALL">
     <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="ball" />
     <component type="BallDynamicBodyComponent" material="BOUNCY_CUBE" />

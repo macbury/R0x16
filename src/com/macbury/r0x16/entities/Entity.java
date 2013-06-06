@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Pool.Poolable;
@@ -188,6 +189,10 @@ public class Entity implements Poolable {
   public void setCenterPosition(float x, float y) {
     this.position.x = Math.round(x - this.getWidth() / 2);
     this.position.y = Math.round(y - this.getHeight() / 2);
+  }
+
+  public Vector2 getCenteredPositionInMeters() {
+    return new Vector2(this.getCenterPositionX() * PsychicsManager.WORLD_TO_BOX, this.getCenterPositionY() * PsychicsManager.WORLD_TO_BOX);
   }
   
 }
