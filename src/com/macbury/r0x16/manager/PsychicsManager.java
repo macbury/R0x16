@@ -22,6 +22,13 @@ import com.macbury.r0x16.entities.Entity;
 //http://www.emanueleferonato.com/2012/05/16/simulating-mudslime-with-box2d-bitmaps-and-filters/
 //http://www.badlogicgames.com/wordpress/?p=2017
 public class PsychicsManager {
+  public final static short FILTER_CATEGORY_SCENERY  = 0x0001;
+  public final static short FILTER_CATEGORY_LIGHT    = 0x0002; //LIGHT PASS THROUGH
+  public static final short FILTER_CATEGORY_PLAYER   = 0x0004;
+  public final static short FILTER_MASK_SCENERY      = -1;
+  public final static short FILTER_MASK_PLAYER       = FILTER_CATEGORY_SCENERY | FILTER_CATEGORY_LIGHT;
+  public final static short FILTER_MASK_LIGHT        = FILTER_CATEGORY_SCENERY;
+  
   private OrthographicCamera boxCamera;
   private World world;
   private static final float GRAVITY                 = -9.0f;
@@ -31,6 +38,7 @@ public class PsychicsManager {
   private static final int   BOX_POSITION_ITERATIONS = 4;
   private static final String TAG                    = "PsychicsManager";
   private static final int MAX_RAY_COUNT             = 32;
+  
   private float psychAccumulator                     = 0.0f;
   private LevelManager level;
   private RayHandler rayHandler;

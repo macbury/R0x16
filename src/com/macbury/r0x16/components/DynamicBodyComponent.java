@@ -56,6 +56,7 @@ public class DynamicBodyComponent extends Component {
     }
     body.resetMassData();
     fixtureDef.shape = getShape();
+    fixtureDef.filter.categoryBits = PsychicsManager.FILTER_MASK_SCENERY;
     fixture          = body.createFixture(fixtureDef);
   }
 

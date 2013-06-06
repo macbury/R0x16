@@ -12,7 +12,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.macbury.r0x16.entities.Component;
+import com.macbury.r0x16.manager.PsychicsManager;
 
 public class PointLightComponent extends Component {
   private static final String TAG    = "PointLightComponent";
@@ -29,12 +31,17 @@ public class PointLightComponent extends Component {
     light.setDistance(distance);
     light.setActive(true);
     light.setStaticLight(isStatic);
+
     Body body = component.getBody();
     if (body == null) {
       Gdx.app.error(TAG, "Body cannot be null!");
     }
     light.attachToBody(body, 0, 0f);
     light.setColor(color);
+    Filter filter = new Filter();
+    filter.categoryBits = PsychicsManager.FILTER_CATEGORY_LIGHT;
+    filter.maskBits     = PsychicsManager.FILTER_MASK_LIGHT;
+    light.setContactFilter(filter);
   }
 
   @Override

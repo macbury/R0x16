@@ -112,18 +112,18 @@ public class Entity implements Poolable {
   }
   
   public void update(float delta) {
-    for (Component component : updateComponents) {
-      if (component.isEnabled()) {
-        ComponentUpdateInterface c = (ComponentUpdateInterface)component;
-        c.update(delta);
-      }
-    }
-    
     if (requiredSetup) {
       for (Component component : this.components) {
         component.setup();
       }
       requiredSetup = false;
+    }
+    
+    for (Component component : updateComponents) {
+      if (component.isEnabled()) {
+        ComponentUpdateInterface c = (ComponentUpdateInterface)component;
+        c.update(delta);
+      }
     }
   }
 
