@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <prefabs>
   <prefab id="PLAYER">
-    <component type="PlayerComponent" width="32" height="64" weight="5" />
+    <component type="PlayerComponent" 
+              width="32" 
+             height="64" 
+             weight="2" 
+         move-speed="4.0" />
     <component type="FollowCameraComponent" />
     <component type="DebugComponent" />
   </prefab>

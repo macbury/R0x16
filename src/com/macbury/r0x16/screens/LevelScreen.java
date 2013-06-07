@@ -1,19 +1,9 @@
 package com.macbury.r0x16.screens;
 
-import box2dLight.Light;
-import box2dLight.PointLight;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.macbury.r0x16.Core;
-import com.macbury.r0x16.components.DynamicBodyComponent;
-import com.macbury.r0x16.components.SpriteComponent;
-import com.macbury.r0x16.components.StaticBodyComponent;
 import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.LevelManager;
 import com.macbury.r0x16.manager.ResourceManager;
@@ -37,7 +27,7 @@ public class LevelScreen implements Screen {
       e.getPosition().y = 200;
     }
     
-    for (int i = 5; i < 7; i++) {
+    for (int i = 8; i < 10; i++) {
       Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64 - 58, 700);
     }

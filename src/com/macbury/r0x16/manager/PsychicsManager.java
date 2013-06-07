@@ -31,7 +31,7 @@ public class PsychicsManager {
   
   private OrthographicCamera boxCamera;
   private World world;
-  private static final float GRAVITY                 = -9.0f;
+  private static final float GRAVITY                 = -9.8f;
   public static final float  WORLD_TO_BOX            = 0.032f;
   private static final float BOX_STEP                = 1/60f;
   private static final int   BOX_VELOCITY_ITERATIONS = 8;

@@ -23,7 +23,7 @@ import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.utils.Position;
-
+//http://obviam.net/index.php/getting-started-in-android-game-development-with-libgdx-tutorial-part-4-collision-detection/
 public class PlayerComponent extends Component implements ComponentUpdateInterface {
   final static float MAX_VELOCITY = 7f;
   private static final String TAG = "PlayerComponent";
@@ -36,13 +36,18 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   private int height = 64;
   private float playerWeight = 10;
   private float stillTime;
+  private float moveSpeed = 4.0f;
+  
+  public enum State {
+    Idle, Walking, Jumping
+  }
   
   @Override
   public void update(float delta) {
     Vector2 vel = player.getLinearVelocity();
     Vector2 pos = player.getPosition();
     
-    boolean grounded = true;//isPlayerGrounded(delta);
+    boolean grounded = isPlayerGrounded(delta);
     
     if(grounded) {
       lastGroundTime = System.nanoTime();
@@ -64,27 +69,27 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
       stillTime = 0;
     }
     
-    //if(!grounded) {     
-   //   playerPhysicsFixture.setFriction(0f);
-     // playerSensorFixture.setFriction(0f);      
-    //} else {
-      /*if(!Gdx.input.isKeyPressed(Keys.A) && !Gdx.input.isKeyPressed(Keys.D)) {
+    if(!grounded) {     
+      playerPhysicsFixture.setFriction(0f);
+      playerSensorFixture.setFriction(0f);      
+    } else {
+      if(!Gdx.input.isKeyPressed(Keys.A) && !Gdx.input.isKeyPressed(Keys.D)) {
         playerPhysicsFixture.setFriction(100f);
         playerSensorFixture.setFriction(100f);
       } else {
         playerPhysicsFixture.setFriction(0.2f);
         playerSensorFixture.setFriction(0.2f);
-      }*/
-   // }
+      }
+    }
     
       // apply left impulse, but only if max velocity is not reached yet
     if(Gdx.input.isKeyPressed(Keys.A) && vel.x > -MAX_VELOCITY) {
-      player.applyLinearImpulse(-20f, 0, pos.x, pos.y, true);
+      player.applyLinearImpulse(-moveSpeed, 0, pos.x, pos.y, true);
     }
  
     // apply right impulse, but only if max velocity is not reached yet
     if(Gdx.input.isKeyPressed(Keys.D) && vel.x < MAX_VELOCITY) {
-      player.applyLinearImpulse(20f, 0, pos.x, pos.y, true);
+      player.applyLinearImpulse(moveSpeed, 0, pos.x, pos.y, true);
     }
     
     player.setAwake(true);
@@ -170,6 +175,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     this.width        = Integer.parseInt(map.get("width"));
     this.height       = Integer.parseInt(map.get("height"));
     this.playerWeight = Float.parseFloat(map.get("weight"));
+    this.moveSpeed    = Float.parseFloat(map.get("move-speed"));
   }
 
 
