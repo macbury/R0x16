@@ -70,7 +70,16 @@ public class PsychicsManager {
         boxCamera.viewportHeight * boxCamera.zoom);
     rayHandler.update();
   }
-
+  
+  public static void updateEntityByBody(Body b) {
+    Entity e = (Entity) b.getUserData();
+    
+    if (e != null) {
+      e.setCenterPosition(b.getPosition().x / PsychicsManager.WORLD_TO_BOX, b.getPosition().y / PsychicsManager.WORLD_TO_BOX);
+      e.setRotation(MathUtils.radiansToDegrees * b.getAngle());
+    }
+  }
+  
   public void update(float delta) {
     psychAccumulator += delta;
     while(psychAccumulator > BOX_STEP){
@@ -81,13 +90,7 @@ public class PsychicsManager {
     Iterator<Body> bi = world.getBodies();
     
     while (bi.hasNext()){
-      Body b = bi.next();
-      Entity e = (Entity) b.getUserData();
-
-      if (e != null) {
-        e.setCenterPosition(b.getPosition().x / PsychicsManager.WORLD_TO_BOX, b.getPosition().y / PsychicsManager.WORLD_TO_BOX);
-        e.setRotation(MathUtils.radiansToDegrees * b.getAngle());
-      }
+      PsychicsManager.updateEntityByBody(bi.next());
     }
     
     updateRayCamera();

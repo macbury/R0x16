@@ -104,7 +104,7 @@ public class PrefabManager {
   public Entity build(String id) {
     PrefabFactor factor = this.prefabs.get(id);
     Entity e            = new Entity();
-    
+    e.id                = id;
     for (Class<? extends Component> componentKlass : factor.getComponentsOrderList()) {
       Component component = e.addComponent(componentKlass);
       component.configure( factor.getComponents().get(componentKlass) );

@@ -38,6 +38,8 @@ public class PointLightComponent extends Component {
     }
     light.attachToBody(body, 0, 0f);
     light.setColor(color);
+   // light.setSoft(true);
+    //light.setSoftnessLenght(1.0f);
     Filter filter = new Filter();
     filter.categoryBits = PsychicsManager.FILTER_CATEGORY_LIGHT;
     filter.maskBits     = PsychicsManager.FILTER_MASK_LIGHT;

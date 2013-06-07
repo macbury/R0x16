@@ -6,18 +6,20 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.macbury.r0x16.entities.Component;
 import com.macbury.r0x16.entities.ComponentUpdateInterface;
 import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
+import com.macbury.r0x16.manager.ResourceManager;
 
 public class StaticBodyComponent extends Component {
   private BodyDef bodyDef;
   private PolygonShape shape;
   private Body body;
-  
+  private FixtureDef fixtureDef;
   public StaticBodyComponent() {
     bodyDef = new BodyDef();
   }
@@ -30,7 +32,14 @@ public class StaticBodyComponent extends Component {
     
     shape = new PolygonShape();
     shape.setAsBox(Math.round(owner.getWidth() * PsychicsManager.WORLD_TO_BOX / 2), Math.round(owner.getHeight() * PsychicsManager.WORLD_TO_BOX / 2));
-    body.createFixture(shape, 0.0f);
+    
+    if (fixtureDef == null) {
+      fixtureDef = new FixtureDef();
+      fixtureDef.density = 0.0f;
+    }
+    fixtureDef.filter.categoryBits = PsychicsManager.FILTER_CATEGORY_SCENERY;
+    fixtureDef.shape = shape;
+    body.createFixture(fixtureDef);
     shape.dispose();
     this.body.setUserData(owner);
   }
@@ -43,7 +52,6 @@ public class StaticBodyComponent extends Component {
 
   @Override
   public void configure(Map<String, String> map) {
-    // TODO Auto-generated method stub
-    
+    fixtureDef = ResourceManager.shared().getFixtureDef(map.get("material"));
   }
 }

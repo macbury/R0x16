@@ -28,8 +28,10 @@ public class Entity implements Poolable {
   private int height;
   private Vector3 positionCache;
   private float rotation = 0.0f;
+  public String id;
   
   public Entity() {
+    this.id                 = "Entity";
     this.position           = new Position();
     this.components         = new ArrayList<Component>();
     this.renderComponents   = new ArrayList<Component>();
@@ -103,10 +105,12 @@ public class Entity implements Poolable {
   }
   
   public void render(SpriteBatch batch) {
-    for (Component component : renderComponents) {
-      if (component.isEnabled()) {
-        ComponentRenderInterface c = (ComponentRenderInterface)component;
-        c.render(batch);
+    if (!requiredSetup) {
+      for (Component component : renderComponents) {
+        if (component.isEnabled()) {
+          ComponentRenderInterface c = (ComponentRenderInterface)component;
+          c.render(batch);
+        }
       }
     }
   }
@@ -116,6 +120,7 @@ public class Entity implements Poolable {
       for (Component component : this.components) {
         component.setup();
       }
+      Gdx.app.log(TAG, "Setup: "+ this.toString());
       requiredSetup = false;
     }
     
@@ -141,6 +146,18 @@ public class Entity implements Poolable {
     return this.positionCache;
   }
   
+  private Vector3 getLeftBottomPoint() {
+    this.positionCache.set(getPosition());
+    this.positionCache.add(0, getHeight(), getPosition().z);
+    return this.positionCache;
+  }
+  
+  private Vector3 getRightTopPoint() {
+    this.positionCache.set(getPosition());
+    this.positionCache.add(getWidth(), 0, getPosition().z);
+    return this.positionCache;
+  }
+  
   public int getWidth() {
     return width;
   }
@@ -158,7 +175,7 @@ public class Entity implements Poolable {
   }
 
   public boolean visibleByCamera(OrthographicCamera camera) {
-    return camera.frustum.pointInFrustum(getPosition()) || camera.frustum.pointInFrustum(getRightBottomPoint());
+    return camera.frustum.pointInFrustum(getPosition()) || camera.frustum.pointInFrustum(getRightBottomPoint()) || camera.frustum.pointInFrustum(getLeftBottomPoint()) || camera.frustum.pointInFrustum(getRightTopPoint());
   }
 
   public void setPositionInMeters(float x, float y) {
@@ -195,4 +212,7 @@ public class Entity implements Poolable {
     return new Vector2(this.getCenterPositionX() * PsychicsManager.WORLD_TO_BOX, this.getCenterPositionY() * PsychicsManager.WORLD_TO_BOX);
   }
   
+  public String toString() {
+    return this.id + " " + this.position.x + "x" + this.position.y + " - " + this.width + "x" + this.height;
+  }
 }

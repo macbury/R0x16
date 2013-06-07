@@ -25,7 +25,7 @@ public class LevelScreen implements Screen {
   public LevelScreen() {
     level      = new LevelManager("test.level");
     
-    for (int i = 5; i < 24; i++) {
+    for (int i = 5; i < 17; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
       e.getPosition().y = 300;
@@ -37,23 +37,23 @@ public class LevelScreen implements Screen {
       e.getPosition().y = 200;
     }
     
-    for (int i = 5; i < 13; i++) {
+    for (int i = 5; i < 7; i++) {
       Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64 - 58, 700);
     }
-    for (int i = 12; i < 16; i++) {
+    for (int i = 12; i < 13; i++) {
       Entity e   = level.getEntityManager().build("BOUNCY_CUBE");
       e.setPosition(i * 64 - 53, 500);
     }
     
-    for (int i = 7; i < 13; i++) {
+    for (int i = 7; i < 7; i++) {
       Entity e   = level.getEntityManager().build("LIGHT_BALL");
       e.getPosition().x = i * 68;
       e.getPosition().y = 600;
     }
     
     Entity e   = level.getEntityManager().build("PLAYER");
-    e.getPosition().x = 500;
+    e.getPosition().x = 400;
     e.getPosition().y = 800;
     debugBatch = new SpriteBatch();
   }

@@ -2,12 +2,14 @@
 <prefabs>
   <prefab id="PLAYER">
     <component type="PlayerComponent" width="32" height="64" weight="5" />
+    <component type="FollowCameraComponent" />
+    <component type="DebugComponent" />
   </prefab>
 
   <prefab id="LIGHT_BALL">
     <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="ball" />
     <component type="BallDynamicBodyComponent" material="BOUNCY_CUBE" />
-    <component type="PointLightComponent"      static="false" distance="10" red="1.0" green="1.0" blue="1.0" alpha="0.7" />
+    <component type="PointLightComponent"      static="false" distance="8" red="1.0" green="1.0" blue="1.0" alpha="0.7" />
   </prefab>
 
   <prefab id="CUBE">
@@ -22,6 +24,7 @@
   
   <prefab id="GROUND">
     <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devTrans" />
-    <component type="StaticBodyComponent" />
+    <component type="StaticBodyComponent"  material="GROUND" />
+    <!--<component type="DebugComponent" /> -->
   </prefab>
 </prefabs>
