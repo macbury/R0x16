@@ -21,6 +21,7 @@ import com.macbury.r0x16.entities.Entity;
 //https://code.google.com/p/libgdx/wiki/PhysicsBox2D
 //http://www.emanueleferonato.com/2012/05/16/simulating-mudslime-with-box2d-bitmaps-and-filters/
 //http://www.badlogicgames.com/wordpress/?p=2017
+//http://obviam.net/index.php/getting-started-in-android-game-development-with-libgdx-tutorial-part-4-collision-detection/
 public class PsychicsManager {
   public final static short FILTER_CATEGORY_SCENERY  = 0x0001;
   public final static short FILTER_CATEGORY_LIGHT    = 0x0002; //LIGHT PASS THROUGH

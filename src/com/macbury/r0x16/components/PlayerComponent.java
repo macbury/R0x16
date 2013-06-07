@@ -23,7 +23,7 @@ import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.utils.Position;
-//http://obviam.net/index.php/getting-started-in-android-game-development-with-libgdx-tutorial-part-4-collision-detection/
+
 public class PlayerComponent extends Component implements ComponentUpdateInterface {
   final static float MAX_VELOCITY = 7f;
   private static final String TAG = "PlayerComponent";
@@ -37,6 +37,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   private float playerWeight = 10;
   private float stillTime;
   private float moveSpeed = 4.0f;
+  private float jumpPower = 20.0f;
   
   public enum State {
     Idle, Walking, Jumping
@@ -48,7 +49,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     Vector2 pos = player.getPosition();
     
     boolean grounded = isPlayerGrounded(delta);
-    
+    boolean jump     = Gdx.input.isKeyPressed(Keys.W);
     if(grounded) {
       lastGroundTime = System.nanoTime();
     } else {
@@ -90,6 +91,15 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     // apply right impulse, but only if max velocity is not reached yet
     if(Gdx.input.isKeyPressed(Keys.D) && vel.x < MAX_VELOCITY) {
       player.applyLinearImpulse(moveSpeed, 0, pos.x, pos.y, true);
+    }
+    
+    if (jump) {
+      jump = false;
+      if(grounded) {
+        player.setLinearVelocity(vel.x, 0); 
+        player.setTransform(pos.x, pos.y + 0.01f, 0);
+        player.applyLinearImpulse(0, jumpPower, pos.x, pos.y, true);
+      }
     }
     
     player.setAwake(true);
@@ -147,7 +157,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     poly.dispose();     
  
     CircleShape circle         = new CircleShape();   
-    circle.setRadius(e.getWidth() / 2 * PsychicsManager.WORLD_TO_BOX);
+    circle.setRadius((Math.round(e.getWidth() / 2) + 2) * PsychicsManager.WORLD_TO_BOX);
     circle.setPosition(new Vector2(0, -e.getHeight() / 2 * PsychicsManager.WORLD_TO_BOX));
     
     fixDef                     = new FixtureDef();
@@ -176,8 +186,6 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     this.height       = Integer.parseInt(map.get("height"));
     this.playerWeight = Float.parseFloat(map.get("weight"));
     this.moveSpeed    = Float.parseFloat(map.get("move-speed"));
+    this.jumpPower     = Float.parseFloat(map.get("jump-power"));
   }
-
-
-
 }

@@ -5,9 +5,10 @@
               width="32" 
              height="64" 
              weight="2" 
-         move-speed="4.0" />
+         move-speed="2.0"
+         jump-power="27.0" />
     <component type="FollowCameraComponent" />
-    <component type="DebugComponent" />
+    <!--<component type="DebugComponent" />-->
   </prefab>
 
   <prefab id="LIGHT_BALL">
