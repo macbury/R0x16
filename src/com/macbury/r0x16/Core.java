@@ -61,7 +61,6 @@ public class Core extends Game {
     return _shared;
   }
 
-  
   public static void setHWCursorVisible(boolean visible) throws LWJGLException {
     if (Gdx.app.getType() != ApplicationType.Desktop && Gdx.app instanceof LwjglApplication)
       return;

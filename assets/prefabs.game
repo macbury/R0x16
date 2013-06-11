@@ -2,13 +2,14 @@
 <prefabs>
   <prefab id="PLAYER">
     <component type="PlayerComponent" 
-              width="32" 
-             height="64" 
+              width="24" 
+             height="28" 
              weight="2" 
-         move-speed="2.0"
-         jump-power="27.0" />
+         move-speed="3.0"
+         jump-power="8" />
     <component type="FollowCameraComponent" />
-    <!--<component type="DebugComponent" />-->
+    <component type="SpriteComponent" atlas="PLAYER_ATLAS" region="bob" />
+    
   </prefab>
 
   <prefab id="LIGHT_BALL">
@@ -30,6 +31,5 @@
   <prefab id="GROUND">
     <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devTrans" />
     <component type="StaticBodyComponent"  material="GROUND" />
-    <!--<component type="DebugComponent" /> -->
   </prefab>
 </prefabs>

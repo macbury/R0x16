@@ -20,7 +20,7 @@ public class DebugComponent extends Component implements ComponentRenderInterfac
   public void render(SpriteBatch batch) {
     //renderer.setProjectionMatrix(getOwner().getLevel().getCamera().combined);
     Position pos = getOwner().getPosition();
-    ResourceManager.shared().getFont("CURRIER_NEW").draw(batch, getOwner().toString(), pos.x, pos.y);
+    ResourceManager.shared().getFont("CURRIER_NEW").draw(batch, pos.x + "x" + pos.y, pos.x, pos.y);
   }
 
   @Override

@@ -14,29 +14,35 @@ public class LevelScreen implements Screen {
   
   public LevelScreen() {
     level      = new LevelManager("test.level");
-    
-    for (int i = 5; i < 17; i++) {
+    for (int i = 0; i < 20; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;
-      e.getPosition().y = 300;
+      e.getPosition().y = 0;
     }
     
-    for (int i = -1; i < 4; i++) {
+    for (int i = 0; i < 20; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
-      e.getPosition().x = 64 * i;
-      e.getPosition().y = 200;
+      e.getPosition().x = 0;
+      e.getPosition().y = i * 64;
+    }
+    
+    
+    for (int i = 8; i < 9; i++) {
+      Entity e   = level.getEntityManager().build("CUBE");
+      e.setPosition(i * 64, 700);
     }
     
     for (int i = 8; i < 10; i++) {
       Entity e   = level.getEntityManager().build("CUBE");
-      e.setPosition(i * 64 - 58, 700);
+      e.setPosition(i * 64, 764);
     }
+    
     for (int i = 12; i < 13; i++) {
       Entity e   = level.getEntityManager().build("BOUNCY_CUBE");
       e.setPosition(i * 64 - 53, 500);
     }
     
-    for (int i = 7; i < 7; i++) {
+    for (int i = 8; i < 9; i++) {
       Entity e   = level.getEntityManager().build("LIGHT_BALL");
       e.getPosition().x = i * 68;
       e.getPosition().y = 600;
@@ -44,7 +50,7 @@ public class LevelScreen implements Screen {
     
     Entity e   = level.getEntityManager().build("PLAYER");
     e.getPosition().x = 400;
-    e.getPosition().y = 800;
+    e.getPosition().y = 64;
     debugBatch = new SpriteBatch();
   }
   
@@ -59,7 +65,7 @@ public class LevelScreen implements Screen {
   }
 
   private void renderDebug() {
-    debugBatch.setProjectionMatrix(level.getCamera().combined);
+    //debugBatch.setProjectionMatrix(level.getCamera().combined);
     debugBatch.begin();
     ResourceManager.shared().getFont("CURRIER_NEW").draw(debugBatch, "FPS: "+ Gdx.graphics.getFramesPerSecond() + " Renders: "+level.getEntityManager().getRenderCounts() + " Updates: " + level.getEntityManager().getUpdateCounts() + " Entities: " + level.getEntityManager().size(), 10, 20);
     debugBatch.end();

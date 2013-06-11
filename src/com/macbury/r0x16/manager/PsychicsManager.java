@@ -93,8 +93,6 @@ public class PsychicsManager {
     while (bi.hasNext()){
       PsychicsManager.updateEntityByBody(bi.next());
     }
-    
-    updateRayCamera();
   }
   
   
@@ -107,6 +105,7 @@ public class PsychicsManager {
   }
 
   public void render() {
+    updateRayCamera();
     rayHandler.render();
     
     debugRender.render( getWorld(), boxCamera.combined );

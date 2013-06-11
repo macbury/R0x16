@@ -204,8 +204,8 @@ public class Entity implements Poolable {
   }
 
   public void setCenterPosition(float x, float y) {
-    this.position.x = Math.round(x - this.getWidth() / 2);
-    this.position.y = Math.round(y - this.getHeight() / 2);
+    this.position.x = Math.round(x - Math.round(this.getWidth() / 2));
+    this.position.y = Math.round(y - Math.round(this.getHeight() / 2));
   }
 
   public Vector2 getCenteredPositionInMeters() {

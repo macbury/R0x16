@@ -24,8 +24,9 @@ import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.utils.Position;
 
-public class PlayerComponent extends Component implements ComponentUpdateInterface {
-  final static float MAX_VELOCITY = 7f;
+public class PlayerComponent extends Component implements ComponentUpdateInterface, ComponentRenderInterface {
+  final static float MAX_VELOCITY = 6f;
+  private float MAX_FALL_VELOCITY = 20f;
   private static final String TAG = "PlayerComponent";
   boolean jump = false;
   private Fixture playerPhysicsFixture;
@@ -38,6 +39,9 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   private float stillTime;
   private float moveSpeed = 4.0f;
   private float jumpPower = 20.0f;
+  private boolean grounded;
+  private float sensorHeight;
+  private float slopeFactor;
   
   public enum State {
     Idle, Walking, Jumping
@@ -48,8 +52,8 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     Vector2 vel = player.getLinearVelocity();
     Vector2 pos = player.getPosition();
     
-    boolean grounded = isPlayerGrounded(delta);
-    boolean jump     = Gdx.input.isKeyPressed(Keys.W);
+    this.grounded = isPlayerGrounded(delta);
+    this.jump     = Gdx.input.isKeyPressed(Keys.W);
     if(grounded) {
       lastGroundTime = System.nanoTime();
     } else {
@@ -57,15 +61,11 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
         grounded = true;
       }
     }
-    
-    if(Math.abs(vel.x) > MAX_VELOCITY) {      
-      vel.x = Math.signum(vel.x) * MAX_VELOCITY;
-      player.setLinearVelocity(vel.x, vel.y);
-    }
+
     
     if(!Gdx.input.isKeyPressed(Keys.A) && !Gdx.input.isKeyPressed(Keys.D)) {      
       stillTime += Gdx.graphics.getDeltaTime();
-      player.setLinearVelocity(vel.x * 0.9f, vel.y);
+      player.setLinearVelocity(vel.x * 0.1f, vel.y);
     } else { 
       stillTime = 0;
     }
@@ -83,21 +83,28 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
       }
     }
     
+    float speed = moveSpeed;
       // apply left impulse, but only if max velocity is not reached yet
     if(Gdx.input.isKeyPressed(Keys.A) && vel.x > -MAX_VELOCITY) {
-      player.applyLinearImpulse(-moveSpeed, 0, pos.x, pos.y, true);
+      player.applyLinearImpulse(-speed, 0, pos.x, pos.y, true);
     }
  
     // apply right impulse, but only if max velocity is not reached yet
     if(Gdx.input.isKeyPressed(Keys.D) && vel.x < MAX_VELOCITY) {
-      player.applyLinearImpulse(moveSpeed, 0, pos.x, pos.y, true);
+      player.applyLinearImpulse(speed, 0, pos.x, pos.y, true);
+    }
+    
+    
+    if(Math.abs(vel.x) > MAX_VELOCITY) {      
+      vel.x = Math.signum(vel.x) * MAX_VELOCITY;
+      player.setLinearVelocity(vel.x, vel.y);
     }
     
     if (jump) {
       jump = false;
       if(grounded) {
         player.setLinearVelocity(vel.x, 0); 
-        player.setTransform(pos.x, pos.y + 0.01f, 0);
+        player.setTransform(pos.x, pos.y, 0);
         player.applyLinearImpulse(0, jumpPower, pos.x, pos.y, true);
       }
     }
@@ -112,11 +119,14 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
       if(contact.isTouching() && (contact.getFixtureA() == playerSensorFixture ||
          contact.getFixtureB() == playerSensorFixture)) {       
  
-        Vector2 pos = player.getPosition();
+        Vector2 pos            = player.getPosition();
         WorldManifold manifold = contact.getWorldManifold();
         boolean below = true;
+        slopeFactor = 0.0f;
         for(int j = 0; j < manifold.getNumberOfContactPoints(); j++) {
-          below &= (manifold.getPoints()[j].y < pos.y - 1.5f);
+          slopeFactor = Math.abs(Math.round((pos.x - manifold.getPoints()[j].x) * 10000));
+          //Gdx.app.log(TAG, "Slope: "+ slopeFactor);
+          below       &= (manifold.getPoints()[j].y < pos.y - sensorHeight && slopeFactor <= 4000);
         }
  
         if(below) {
@@ -141,13 +151,20 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     Entity e = getOwner();
     e.setWidth(width);
     e.setHeight(height);
-    BodyDef def = new BodyDef();
-    def.type    = BodyType.DynamicBody;
+    
+    this.sensorHeight          = (e.getWidth() / 2 * PsychicsManager.WORLD_TO_BOX);
+    BodyDef def                = new BodyDef();
+    def.type                   = BodyType.DynamicBody;
     def.position.set(e.getCenterPositionX() * PsychicsManager.WORLD_TO_BOX, e.getCenterPositionY() * PsychicsManager.WORLD_TO_BOX);
     
     Body box                   = e.getLevel().getPsychicsManager().getWorld().createBody(def);
     PolygonShape poly          = new PolygonShape();   
-    poly.setAsBox(e.getWidth() * PsychicsManager.WORLD_TO_BOX / 2, e.getHeight() * PsychicsManager.WORLD_TO_BOX / 2);
+    float widthInMeters        = e.getWidth() * PsychicsManager.WORLD_TO_BOX / 2.0f;
+    float heightInMeters       = e.getHeight() * PsychicsManager.WORLD_TO_BOX / 2.0f;
+    
+    Gdx.app.log(TAG, "Size in meters: "+ widthInMeters + "x"+heightInMeters);
+    
+    poly.setAsBox(widthInMeters, heightInMeters);
     
     FixtureDef fixDef          = new FixtureDef();
     fixDef.shape               = poly;
@@ -157,8 +174,9 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     poly.dispose();     
  
     CircleShape circle         = new CircleShape();   
-    circle.setRadius((Math.round(e.getWidth() / 2) + 2) * PsychicsManager.WORLD_TO_BOX);
-    circle.setPosition(new Vector2(0, -e.getHeight() / 2 * PsychicsManager.WORLD_TO_BOX));
+    circle.setRadius(widthInMeters+0.032f);
+    
+    circle.setPosition(new Vector2(0, -(widthInMeters)));
     
     fixDef                     = new FixtureDef();
     fixDef.shape               = circle;
@@ -187,5 +205,12 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     this.playerWeight = Float.parseFloat(map.get("weight"));
     this.moveSpeed    = Float.parseFloat(map.get("move-speed"));
     this.jumpPower     = Float.parseFloat(map.get("jump-power"));
+  }
+
+  @Override
+  public void render(SpriteBatch batch) {
+    Position pos = getOwner().getPosition();
+    
+    ResourceManager.shared().getFont("CURRIER_NEW").drawMultiLine(batch, "friction: " + playerPhysicsFixture.getFriction() + "\ngrounded: " + grounded + "\nSlope: " + slopeFactor, pos.x+20, pos.y);
   }
 }

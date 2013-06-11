@@ -7,20 +7,13 @@ import com.macbury.r0x16.entities.Component;
 import com.macbury.r0x16.entities.ComponentUpdateInterface;
 import com.macbury.r0x16.entities.Entity;
 
-public class FollowCameraComponent extends Component implements ComponentUpdateInterface {
+public class FollowCameraComponent extends Component {
 
-  @Override
-  public void update(float delta) {
-    Entity e = getOwner();
-    OrthographicCamera camera = e.getLevel().getCamera();
-    //camera.position.set(e.getPosition());
-    //camera.position.y -= 10;
-  }
 
   @Override
   public void setup() {
-    // TODO Auto-generated method stub
-
+    Entity e = getOwner();
+    e.getLevel().setLookAt(e);
   }
 
   @Override

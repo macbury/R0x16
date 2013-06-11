@@ -33,6 +33,7 @@ public class ResourceManager {
   private Map<String, BitmapFont> fonts;
   private Map<String, Texture> textures;
   private Map<String, FixtureDef> materials;
+  
   public static ResourceManager shared() {
     if (_shared == null) {
       _shared = new ResourceManager();
