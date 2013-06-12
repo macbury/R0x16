@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <resource type="atlas"   id="DEVELOPER_ATLAS">developer_textures</resource>
-  <resource type="atlas"   id="PLAYER_ATLAS">player</resource>
+  <resource type="atlas"   id="PLAYER_ATLAS">astronaut</resource>
   <resource type="texture" id="CURSOR_ARROW">cursors/arrow.png</resource>
   <resource type="texture" id="CURSOR_SELECT">cursors/select.png</resource>
   <resource type="theme"   id="UI_SKIN">uiskin</resource>
@@ -9,5 +9,5 @@
   
   <resource type="material" id="GROUND"      density="0"   friction="0.5"   restitution="0" />
   <resource type="material" id="CUBE"        density="40"   friction="10"    restitution="0" />
-  <resource type="material" id="BOUNCY_CUBE" density="12"   friction="1"    restitution="0.3" />
+  <resource type="material" id="BOUNCY_CUBE" density="2"   friction="1"    restitution="1" />
 </resources>

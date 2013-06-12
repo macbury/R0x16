@@ -25,9 +25,10 @@ import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.utils.Position;
 
 public class PlayerComponent extends Component implements ComponentUpdateInterface, ComponentRenderInterface {
-  final static float MAX_VELOCITY = 6f;
-  private float MAX_FALL_VELOCITY = 20f;
-  private static final String TAG = "PlayerComponent";
+  final static float MAX_VELOCITY      = 6f;
+  private float MAX_FALL_VELOCITY      = 20f;
+  private static final String TAG      = "PlayerComponent";
+  private static final float MAX_SLOPE = 3000;
   boolean jump = false;
   private Fixture playerPhysicsFixture;
   private Fixture playerSensorFixture;
@@ -42,6 +43,9 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   private boolean grounded;
   private float sensorHeight;
   private float slopeFactor;
+  private float sensorPositionY = -0.6f;
+  
+  private State state = State.Idle; 
   
   public enum State {
     Idle, Walking, Jumping
@@ -52,8 +56,10 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     Vector2 vel = player.getLinearVelocity();
     Vector2 pos = player.getPosition();
     
-    this.grounded = isPlayerGrounded(delta);
-    this.jump     = Gdx.input.isKeyPressed(Keys.W);
+    this.grounded    = isPlayerGrounded(delta);
+    this.jump        = Gdx.input.isKeyPressed(Keys.W);
+    boolean keyLeft  = Gdx.input.isKeyPressed(Keys.A);
+    boolean keyRight = Gdx.input.isKeyPressed(Keys.D);
     if(grounded) {
       lastGroundTime = System.nanoTime();
     } else {
@@ -61,9 +67,8 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
         grounded = true;
       }
     }
-
     
-    if(!Gdx.input.isKeyPressed(Keys.A) && !Gdx.input.isKeyPressed(Keys.D)) {      
+    if(!keyLeft && !keyRight) {      
       stillTime += Gdx.graphics.getDeltaTime();
       player.setLinearVelocity(vel.x * 0.1f, vel.y);
     } else { 
@@ -74,7 +79,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
       playerPhysicsFixture.setFriction(0f);
       playerSensorFixture.setFriction(0f);      
     } else {
-      if(!Gdx.input.isKeyPressed(Keys.A) && !Gdx.input.isKeyPressed(Keys.D)) {
+      if(!keyLeft && !keyRight) {
         playerPhysicsFixture.setFriction(100f);
         playerSensorFixture.setFriction(100f);
       } else {
@@ -84,16 +89,14 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     }
     
     float speed = moveSpeed;
-      // apply left impulse, but only if max velocity is not reached yet
-    if(Gdx.input.isKeyPressed(Keys.A) && vel.x > -MAX_VELOCITY) {
+    
+    if(keyLeft && vel.x > -MAX_VELOCITY) {
       player.applyLinearImpulse(-speed, 0, pos.x, pos.y, true);
     }
- 
-    // apply right impulse, but only if max velocity is not reached yet
-    if(Gdx.input.isKeyPressed(Keys.D) && vel.x < MAX_VELOCITY) {
+    
+    if(keyRight && vel.x < MAX_VELOCITY) {
       player.applyLinearImpulse(speed, 0, pos.x, pos.y, true);
     }
-    
     
     if(Math.abs(vel.x) > MAX_VELOCITY) {      
       vel.x = Math.signum(vel.x) * MAX_VELOCITY;
@@ -107,6 +110,14 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
         player.setTransform(pos.x, pos.y, 0);
         player.applyLinearImpulse(0, jumpPower, pos.x, pos.y, true);
       }
+    }
+
+    if (!grounded) {
+      this.state = State.Jumping;
+    } else if(keyLeft || keyRight) {
+      this.state = State.Walking;
+    } else {
+      this.state = State.Idle;
     }
     
     player.setAwake(true);
@@ -126,7 +137,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
         for(int j = 0; j < manifold.getNumberOfContactPoints(); j++) {
           slopeFactor = Math.abs(Math.round((pos.x - manifold.getPoints()[j].x) * 10000));
           //Gdx.app.log(TAG, "Slope: "+ slopeFactor);
-          below       &= (manifold.getPoints()[j].y < pos.y - sensorHeight && slopeFactor <= 4000);
+          below       &= (manifold.getPoints()[j].y < pos.y - sensorHeight && slopeFactor <= MAX_SLOPE);
         }
  
         if(below) {
@@ -159,10 +170,10 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     
     Body box                   = e.getLevel().getPsychicsManager().getWorld().createBody(def);
     PolygonShape poly          = new PolygonShape();   
-    float widthInMeters        = e.getWidth() * PsychicsManager.WORLD_TO_BOX / 2.0f;
+    float widthInMeters        = e.getWidth()  * PsychicsManager.WORLD_TO_BOX / 2.0f;
     float heightInMeters       = e.getHeight() * PsychicsManager.WORLD_TO_BOX / 2.0f;
-    
-    Gdx.app.log(TAG, "Size in meters: "+ widthInMeters + "x"+heightInMeters);
+    float sensorRadius         = widthInMeters;
+    //Gdx.app.log(TAG, "Size in meters: "+ widthInMeters + "x"+heightInMeters);
     
     poly.setAsBox(widthInMeters, heightInMeters);
     
@@ -174,9 +185,9 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     poly.dispose();     
  
     CircleShape circle         = new CircleShape();   
-    circle.setRadius(widthInMeters+0.032f);
+    circle.setRadius(sensorRadius+0.032f);
     
-    circle.setPosition(new Vector2(0, -(widthInMeters)));
+    circle.setPosition(new Vector2(0, sensorPositionY ));
     
     fixDef                     = new FixtureDef();
     fixDef.shape               = circle;
@@ -204,13 +215,22 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     this.height       = Integer.parseInt(map.get("height"));
     this.playerWeight = Float.parseFloat(map.get("weight"));
     this.moveSpeed    = Float.parseFloat(map.get("move-speed"));
-    this.jumpPower     = Float.parseFloat(map.get("jump-power"));
+    this.jumpPower    = Float.parseFloat(map.get("jump-power"));
+    this.sensorPositionY    = Float.parseFloat(map.get("sensor-offset-y"));
   }
 
   @Override
   public void render(SpriteBatch batch) {
     Position pos = getOwner().getPosition();
     
-    ResourceManager.shared().getFont("CURRIER_NEW").drawMultiLine(batch, "friction: " + playerPhysicsFixture.getFriction() + "\ngrounded: " + grounded + "\nSlope: " + slopeFactor, pos.x+20, pos.y);
+    ResourceManager.shared().getFont("CURRIER_NEW").drawMultiLine(batch, "friction: " + playerPhysicsFixture.getFriction() + "\nstate: " + getState().toString() + "\nSlope: " + slopeFactor, pos.x+20, pos.y);
+  }
+
+  public State getState() {
+    return state;
+  }
+
+  public void setState(State state) {
+    this.state = state;
   }
 }

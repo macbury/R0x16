@@ -15,11 +15,12 @@ import com.macbury.r0x16.utils.Position;
 public class SpriteComponent extends Component implements ComponentRenderInterface {
   private TextureRegion region;
   private Sprite sprite;
+  private float offsetY = 0.0f;
   @Override
   public void render(SpriteBatch batch) {
     if (region != null) {
       Position pos = getOwner().getPosition();
-      this.sprite.setPosition(pos.x, pos.y);
+      this.sprite.setPosition(pos.x, pos.y+ offsetY);
       this.sprite.setRotation(getOwner().getRotation());
       this.sprite.draw(batch);
      // ResourceManager.shared().getFont("CURRIER_NEW").draw(batch, pos.x+"x"+pos.y, pos.x, pos.y);
@@ -50,5 +51,8 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
   public void configure(Map<String, String> map) {
     TextureAtlas atlas = ResourceManager.shared().getAtlas(map.get("atlas"));
     setTexture(atlas.findRegion(map.get("region")));
+    if (map.containsKey("offset-y")) {
+      offsetY = Float.parseFloat(map.get("offset-y"));
+    }
   }
 }

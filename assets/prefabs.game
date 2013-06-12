@@ -2,20 +2,24 @@
 <prefabs>
   <prefab id="PLAYER">
     <component type="PlayerComponent" 
-              width="24" 
-             height="28" 
+              width="26" 
+             height="26" 
+    sensor-offset-y="-0.4"
              weight="2" 
-         move-speed="3.0"
+         move-speed="1.0"
          jump-power="8" />
     <component type="FollowCameraComponent" />
-    <component type="SpriteComponent" atlas="PLAYER_ATLAS" region="bob" />
+    <component type="SpriteComponent" 
+              atlas="PLAYER_ATLAS" 
+             region="astronaut"
+           offset-y="-12" />
     
   </prefab>
 
   <prefab id="LIGHT_BALL">
     <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="ball" />
     <component type="BallDynamicBodyComponent" material="BOUNCY_CUBE" />
-    <component type="PointLightComponent"      static="false" distance="8" red="1.0" green="1.0" blue="1.0" alpha="0.7" />
+    <component type="PointLightComponent"      static="false" distance="30" red="1.0" green="1.0" blue="1.0" alpha="0.8" />
   </prefab>
 
   <prefab id="CUBE">
