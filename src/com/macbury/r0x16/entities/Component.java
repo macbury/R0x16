@@ -24,5 +24,5 @@ public abstract class Component {
 
   public abstract void setup();
   public abstract void reset();
-  public abstract void configure(Map<String, String> map);
+  public abstract void configure(Map<String, Object> map);
 }

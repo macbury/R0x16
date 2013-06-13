@@ -3,6 +3,9 @@ package com.macbury.r0x16.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 import com.macbury.r0x16.Core;
 import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.LevelManager;
@@ -13,6 +16,8 @@ public class LevelScreen implements Screen {
   LevelManager level;
   
   public LevelScreen() {
+    
+    //
     level      = new LevelManager("test.level");
     for (int i = 0; i < 20; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
@@ -26,6 +31,10 @@ public class LevelScreen implements Screen {
       e.getPosition().y = i * 64;
     }
     
+    for (int i = 0; i < 20; i++) {
+      Entity e   = level.getEntityManager().build("GROUND");
+      e.setPosition(1280, i * 64);
+    }
     
     for (int i = 8; i < 9; i++) {
       Entity e   = level.getEntityManager().build("CUBE");

@@ -2,6 +2,7 @@ package com.macbury.r0x16.components;
 
 import java.util.Map;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -48,11 +49,12 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
   }
 
   @Override
-  public void configure(Map<String, String> map) {
-    TextureAtlas atlas = ResourceManager.shared().getAtlas(map.get("atlas"));
-    setTexture(atlas.findRegion(map.get("region")));
+  public void configure(Map<String, Object> map) {
+    TextureAtlas atlas = ResourceManager.shared().getAtlas((String)map.get("atlas"));
+    
+    setTexture(atlas.findRegion((String)map.get("region")));
     if (map.containsKey("offset-y")) {
-      offsetY = Float.parseFloat(map.get("offset-y"));
+      offsetY = Float.parseFloat((String)map.get("offset-y"));
     }
   }
 }

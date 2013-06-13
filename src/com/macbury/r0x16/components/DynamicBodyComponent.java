@@ -45,8 +45,8 @@ public class DynamicBodyComponent extends Component {
 
 
   @Override
-  public void configure(Map<String, String> map) {
-    setFixtureDef(ResourceManager.shared().getFixtureDef(map.get("material")));
+  public void configure(Map<String, Object> map) {
+    setFixtureDef(ResourceManager.shared().getFixtureDef((String)map.get("material")));
   }
 
 

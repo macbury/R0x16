@@ -53,13 +53,13 @@ public class PointLightComponent extends Component {
   }
 
   @Override
-  public void configure(Map<String, String> map) {
-    isStatic = map.get("static")=="true";
-    distance = Float.parseFloat(map.get("distance"));
-    float r = Float.parseFloat(map.get("red"));
-    float g = Float.parseFloat(map.get("green"));
-    float b = Float.parseFloat(map.get("blue"));
-    float a = Float.parseFloat(map.get("alpha"));
+  public void configure(Map<String, Object> map) {
+    isStatic = (String)map.get("static")=="true";
+    distance = Float.parseFloat((String)map.get("distance"));
+    float r = Float.parseFloat((String)map.get("red"));
+    float g = Float.parseFloat((String)map.get("green"));
+    float b = Float.parseFloat((String)map.get("blue"));
+    float a = Float.parseFloat((String)map.get("alpha"));
     color   = new Color(r, g, b, a);
   }
 

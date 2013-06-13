@@ -23,6 +23,7 @@ import com.macbury.r0x16.entities.Entity;
 public class PrefabManager {
   private static PrefabManager _shared;
   private final static String TAG = "PrefabManager";
+  public static final String EXTRA_PAYLOAD = "EXTRA_PAYLOAD";
   private Map<String, PrefabFactor> prefabs;
   
   public static PrefabManager shared() {
@@ -84,12 +85,12 @@ public class PrefabManager {
         String componentName                  = componentElement.getAttribute("type");
         Class<? extends Component> component  = (Class<? extends Component>)Class.forName("com.macbury.r0x16.components."+componentName);
         NamedNodeMap attr                     = componentElement.getAttributes();
-        HashMap<String, String> options       = new HashMap<String, String>();
+        HashMap<String, Object> options       = PrefabManager.getOptionsFromXmlAttributes(attr);
         
-        for (int j = 0; j < attr.getLength(); j++) {
-          Node node = attr.item(j);
-          options.put(node.getNodeName(), node.getTextContent());
+        if (componentElement.getChildNodes().getLength() > 0) {
+          options.put(EXTRA_PAYLOAD, componentElement.getElementsByTagName("extra"));
         }
+        
         factor.getComponents().put(component, options);
         factor.getComponentsOrderList().add(component);
       } catch (ClassNotFoundException e) {
@@ -101,6 +102,16 @@ public class PrefabManager {
     this.prefabs.put(id, factor);
   }
   
+  public static HashMap<String, Object> getOptionsFromXmlAttributes(NamedNodeMap attr) {
+    HashMap<String, Object> options       = new HashMap<String, Object>();
+    
+    for (int j = 0; j < attr.getLength(); j++) {
+      Node node = attr.item(j);
+      options.put(node.getNodeName(), node.getTextContent());
+    }
+    return options;
+  }
+
   public Entity build(String id) {
     PrefabFactor factor = this.prefabs.get(id);
     Entity e            = new Entity();

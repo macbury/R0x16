@@ -45,7 +45,8 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   private float slopeFactor;
   private float sensorPositionY = -0.6f;
   
-  private State state = State.Idle; 
+  private State state = State.Idle;
+  private AnimatedSpriteComponent playerAnimation; 
   
   public enum State {
     Idle, Walking, Jumping
@@ -118,6 +119,20 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
       this.state = State.Walking;
     } else {
       this.state = State.Idle;
+    }
+    
+    if (keyLeft) {
+      playerAnimation.setFlipX(true);
+    } else if (keyRight) {
+      playerAnimation.setFlipX(false);
+    }
+    
+    if (this.state == State.Jumping) {
+      playerAnimation.play("JUMP");
+    } else if (this.state == State.Walking) {
+      playerAnimation.play("WALKING");
+    } else {
+      playerAnimation.play("IDLE");
     }
     
     player.setAwake(true);
@@ -201,6 +216,8 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     player = box;
     player.setUserData(e);
     player.setFixedRotation(true);
+    
+    playerAnimation = (AnimatedSpriteComponent) getOwner().getComponent(AnimatedSpriteComponent.class);
   }
 
   @Override
@@ -210,13 +227,13 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   }
 
   @Override
-  public void configure(Map<String, String> map) {
-    this.width        = Integer.parseInt(map.get("width"));
-    this.height       = Integer.parseInt(map.get("height"));
-    this.playerWeight = Float.parseFloat(map.get("weight"));
-    this.moveSpeed    = Float.parseFloat(map.get("move-speed"));
-    this.jumpPower    = Float.parseFloat(map.get("jump-power"));
-    this.sensorPositionY    = Float.parseFloat(map.get("sensor-offset-y"));
+  public void configure(Map<String, Object> map) {
+    this.width              = Integer.parseInt((String)map.get("width"));
+    this.height             = Integer.parseInt((String)map.get("height"));
+    this.playerWeight       = Float.parseFloat((String)map.get("weight"));
+    this.moveSpeed          = Float.parseFloat((String)map.get("move-speed"));
+    this.jumpPower          = Float.parseFloat((String)map.get("jump-power"));
+    this.sensorPositionY    = Float.parseFloat((String)map.get("sensor-offset-y"));
   }
 
   @Override

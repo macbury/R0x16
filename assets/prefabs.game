@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <prefabs>
   <prefab id="PLAYER">
+    <component type="AnimatedSpriteComponent" offset-y="-12">
+      <extra atlas="PLAYER_ATLAS" region="astronaut_idle"    name="IDLE" duration="2" type="LOOP" />
+      <extra atlas="PLAYER_ATLAS" region="astronaut_walking" name="WALKING" duration="0.2" type="LOOP" />
+      <extra atlas="PLAYER_ATLAS" region="astronaut_jump"    name="JUMP" duration="2" type="LOOP" />
+    </component>
+    
     <component type="PlayerComponent" 
               width="26" 
              height="26" 
@@ -8,12 +14,8 @@
              weight="2" 
          move-speed="1.0"
          jump-power="8" />
-    <component type="FollowCameraComponent" />
-    <component type="SpriteComponent" 
-              atlas="PLAYER_ATLAS" 
-             region="astronaut"
-           offset-y="-12" />
-    
+ 
+    <component type="FollowCameraComponent" /> 
   </prefab>
 
   <prefab id="LIGHT_BALL">

@@ -51,7 +51,7 @@ public class StaticBodyComponent extends Component {
   }
 
   @Override
-  public void configure(Map<String, String> map) {
-    fixtureDef = ResourceManager.shared().getFixtureDef(map.get("material"));
+  public void configure(Map<String, Object> map) {
+    fixtureDef = ResourceManager.shared().getFixtureDef((String)map.get("material"));
   }
 }

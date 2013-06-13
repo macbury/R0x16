@@ -23,7 +23,7 @@ public class FollowCameraComponent extends Component {
   }
 
   @Override
-  public void configure(Map<String, String> map) {
+  public void configure(Map<String, Object> map) {
     // TODO Auto-generated method stub
 
   }

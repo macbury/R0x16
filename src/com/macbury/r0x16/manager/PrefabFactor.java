@@ -8,20 +8,20 @@ import com.macbury.r0x16.entities.Component;
 
 public class PrefabFactor {
   private String id;
-  private Map<Class<? extends Component>, Map<String, String>> components;
+  private Map<Class<? extends Component>, Map<String, Object>> components;
   private ArrayList<Class<? extends Component>> componentsOrderList;
   
   public PrefabFactor(String nid) {
     this.id = nid;
     componentsOrderList = new ArrayList<Class<? extends Component>>();
-    setComponents(new HashMap<Class<? extends Component>, Map<String, String>>());
+    setComponents(new HashMap<Class<? extends Component>, Map<String, Object>>());
   }
   
-  public Map<Class<? extends Component>, Map<String, String>> getComponents() {
+  public Map<Class<? extends Component>, Map<String, Object>> getComponents() {
     return components;
   }
   
-  private void setComponents(Map<Class<? extends Component>, Map<String, String>> components) {
+  private void setComponents(Map<Class<? extends Component>, Map<String, Object>> components) {
     this.components = components;
   }
 
