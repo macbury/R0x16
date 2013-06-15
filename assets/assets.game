@@ -4,7 +4,7 @@
   <resource type="atlas"   id="PLAYER_ATLAS">astronaut</resource>
   <resource type="texture" id="CURSOR_ARROW">cursors/arrow.png</resource>
   <resource type="texture" id="CURSOR_SELECT">cursors/select.png</resource>
-  <resource type="theme"   id="UI_SKIN">uiskin</resource>
+  <resource type="theme"   id="UI_SKIN">holo/ui</resource>
   <resource type="font"    id="CURRIER_NEW" size="16">Courier New.ttf</resource>
   
   <resource type="material" id="GROUND"      density="0"   friction="0.5"   restitution="0" />

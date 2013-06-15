@@ -36,12 +36,12 @@ public class LevelScreen implements Screen {
       e.setPosition(1280, i * 64);
     }
     
-    for (int i = 8; i < 9; i++) {
+    for (int i = 8; i < 10; i++) {
       Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64, 700);
     }
     
-    for (int i = 8; i < 10; i++) {
+    for (int i = 8; i < 12; i++) {
       Entity e   = level.getEntityManager().build("CUBE");
       e.setPosition(i * 64, 764);
     }
@@ -51,7 +51,7 @@ public class LevelScreen implements Screen {
       e.setPosition(i * 64 - 53, 500);
     }
     
-    for (int i = 8; i < 9; i++) {
+    for (int i = 8; i < 14; i++) {
       Entity e   = level.getEntityManager().build("LIGHT_BALL");
       e.getPosition().x = i * 68;
       e.getPosition().y = 600;

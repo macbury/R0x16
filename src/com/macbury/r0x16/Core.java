@@ -1,6 +1,13 @@
 package com.macbury.r0x16;
 
+import java.awt.Cursor;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.nio.IntBuffer;
+
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -14,6 +21,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl.LwjglFrame;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,37 +30,25 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.macbury.r0x16.manager.PrefabManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.screens.CodeEditorTest;
+import com.macbury.r0x16.screens.LevelEditor;
 import com.macbury.r0x16.screens.LevelScreen;
 import com.macbury.r0x16.screens.LightTestScreen;
 
 public class Core extends Game {
-  public static boolean DEBUG = true;
+  public static LwjglFrame frame;
+  public static boolean DEBUG              = true;
   public final static String CURSOR_NORMAL = "CURSOR_ARROW";
   public final static String CURSOR_TEXT   = "CURSOR_SELECT";
   static Core _shared;
   static org.lwjgl.input.Cursor emptyCursor;
+  
   SpriteBatch cursorBatch;
   OrthographicCamera camera;
   int xHotspot, yHotspot;
   
-  boolean hwVisible = false;
+  boolean hwVisible            = false;
   private String currentCursor = CURSOR_NORMAL;
   
-  @Override
-  public void create() {
-    try {
-      ResourceManager.shared().load();
-      PrefabManager.shared().load();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    
-    cursorBatch = new SpriteBatch();
-    camera      = new OrthographicCamera();
-    xHotspot    = 5;
-    yHotspot    = 32;
-    setScreen(new LevelScreen());
-  }
 
   public static Core shared() {
     if (_shared == null) {
@@ -84,7 +80,6 @@ public class Core extends Game {
     Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
     
     super.render();
-    renderCursor();
   }
 
   private void renderCursor() {
@@ -116,6 +111,43 @@ public class Core extends Game {
   public void setCurrentCursor(String currentCursor) {
     this.currentCursor = currentCursor;
   }
+
+  public void bootstrap(LwjglFrame app, String[] args) {
+    Core.frame = app;
+    app.setResizable(false);
+    app.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    app.addWindowListener(new WindowEventHandler());
+    //Core.frame.setCursor(Cursor.getPredefinedCursor(Cursor.));
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (ClassNotFoundException | InstantiationException
+        | IllegalAccessException | UnsupportedLookAndFeelException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
   
+  class WindowEventHandler extends WindowAdapter {
+    public void windowClosing(WindowEvent evt) {
+      Gdx.app.exit();
+      Core.frame.dispose();
+    }
+  }
+
+  @Override
+  public void create() {
+    try {
+      ResourceManager.shared().load();
+      PrefabManager.shared().load();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    cursorBatch = new SpriteBatch();
+    camera      = new OrthographicCamera();
+    xHotspot    = 5;
+    yHotspot    = 32;
+    setScreen(new LevelEditor());
+  }
   
 }

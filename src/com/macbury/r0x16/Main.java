@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl.LwjglFrame;
 
 public class Main {
 
@@ -18,8 +19,8 @@ public class Main {
     config.samples   = 0;
     config.vSyncEnabled = true;
     config.fullscreen = false;
-    LwjglApplication app = new LwjglApplication(Core.shared(), config);
-    
+    LwjglFrame app = new LwjglFrame(Core.shared(), config);
+    Core.shared().bootstrap(app, args);
     //WindowUtilities.setNativeLookAndFeel();
     /*JFrame f = new JFrame("This is a test");
     f.setSize(320, 768);

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.DefaultListModel;
+import javax.swing.ListModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -122,6 +124,16 @@ public class PrefabManager {
     }
     
     return e;
+  }
+
+  public ListModel getListModel() {
+    DefaultListModel listModel = new DefaultListModel();
+    
+    for (String key : prefabs.keySet()) {
+      listModel.addElement(key);
+    }
+    
+    return listModel;
   }
 
 }

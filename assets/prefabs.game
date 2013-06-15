@@ -21,7 +21,7 @@
   <prefab id="LIGHT_BALL">
     <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="ball" />
     <component type="BallDynamicBodyComponent" material="BOUNCY_CUBE" />
-    <component type="PointLightComponent"      static="false" distance="30" red="1.0" green="1.0" blue="1.0" alpha="0.8" />
+    <component type="PointLightComponent"      static="false" distance="30" red="1.0" green="1.0" blue="1.0" alpha="0.4" />
   </prefab>
 
   <prefab id="CUBE">

@@ -2,6 +2,7 @@ package com.macbury.r0x16.manager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Rectangle;
 import com.macbury.r0x16.entities.Entity;
 
 public class LevelManager {
@@ -10,6 +11,8 @@ public class LevelManager {
   private PsychicsManager psychicsManager;
   private OrthographicCamera camera;
   private Entity followEntity;
+  private Rectangle size;
+  
   public LevelManager(String filename) {
     Gdx.app.log(TAG, "Loading level: " + filename);
     camera        = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -18,6 +21,7 @@ public class LevelManager {
     
     setEntityManager(new EntityManager(this));
     setPsychicsManager(new PsychicsManager(this));
+    setSize(new Rectangle(0, 0, 3000, 2000));
   }
   
   public void resize(int width, int height) {
@@ -60,5 +64,13 @@ public class LevelManager {
 
   public void setLookAt(Entity e) {
     this.followEntity = e;
+  }
+
+  public Rectangle getSize() {
+    return size;
+  }
+
+  public void setSize(Rectangle size) {
+    this.size = size;
   }
 }
