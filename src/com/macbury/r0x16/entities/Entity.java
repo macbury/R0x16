@@ -1,6 +1,7 @@
 package com.macbury.r0x16.entities;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 
 import com.badlogic.gdx.Gdx;
@@ -81,6 +82,7 @@ public class Entity implements Poolable {
         if (ComponentUpdateInterface.class.isInstance(component)) {
           this.updateComponents.remove(component);
         }
+        component.onRemove();
         removed = true;
       }
     }
@@ -214,5 +216,15 @@ public class Entity implements Poolable {
   
   public String toString() {
     return this.id + " " + this.position.x + "x" + this.position.y + " - " + this.width + "x" + this.height;
+  }
+
+  public void destroy() {
+    
+    for (int i = 0; i < this.components.size(); i++) {
+      Component com = (Component)this.components.get(i);
+      com.onRemove();
+    }
+    
+    this.getLevel().getEntityManager().remove(this);
   }
 }

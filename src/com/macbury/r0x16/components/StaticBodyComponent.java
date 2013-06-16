@@ -54,4 +54,10 @@ public class StaticBodyComponent extends Component {
   public void configure(Map<String, Object> map) {
     fixtureDef = ResourceManager.shared().getFixtureDef((String)map.get("material"));
   }
+
+  @Override
+  public void onRemove() {
+    Entity owner    = getOwner();
+    owner.getLevel().getPsychicsManager().getWorld().destroyBody(body);
+  }
 }

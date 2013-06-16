@@ -28,4 +28,10 @@ public class FollowCameraComponent extends Component {
 
   }
 
+  @Override
+  public void onRemove() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

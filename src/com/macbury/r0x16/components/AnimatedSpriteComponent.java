@@ -133,4 +133,11 @@ public class AnimatedSpriteComponent extends Component implements ComponentRende
     this.flipY = flipY;
   }
 
+
+  @Override
+  public void onRemove() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

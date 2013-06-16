@@ -26,8 +26,11 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.graphics.Color;
@@ -54,11 +57,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.macbury.r0x16.Core;
+import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.LevelManager;
 import com.macbury.r0x16.manager.PrefabManager;
 import com.macbury.r0x16.manager.ResourceManager;
 
-public class LevelEditor implements Screen, ActionListener {
+public class LevelEditor implements Screen, ActionListener, ListSelectionListener, InputProcessor {
   private Stage stage;
   private JMenuBar menuBar;
   private OrthographicCamera camera;
@@ -69,16 +73,21 @@ public class LevelEditor implements Screen, ActionListener {
   private JScrollBar vBar;
   private JScrollBar hBar;
   private Vector3 tempMouseVector;
+  private JList prefabsList;
   private static final Color GRID_COLOR     = new Color(1, 1, 1, 0.1f);
   private static final Color GRID_BIG_COLOR = new Color(1, 1, 1, 0.15f);
   private static final int GRID_SIZE        = 32;
+  private static final String TAG           = "LevelEditor";
+  
+  private Entity entityBrush;
   
   public LevelEditor() {
     levelManager               = new LevelManager("");
-    camera                     = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    levelManager.getPsychicsManager().pause();
+    camera                     = levelManager.getCamera();
     stage                      = new Stage(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     Skin skin                  = ResourceManager.shared().getMainSkin();
-    //Gdx.input.setInputProcessor(stage);
+    Gdx.input.setInputProcessor(this);
     
     //Stage s = stage;
     //Gdx.input.setInputProcessor(s);
@@ -120,12 +129,12 @@ public class LevelEditor implements Screen, ActionListener {
     JTextField textField = new JTextField(20);
     prefabsFrame.add(textField);
     
-    JList list = new JList(PrefabManager.shared().getListModel());
-    
-    list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-    list.setLayoutOrientation(JList.VERTICAL);
-    list.setVisibleRowCount(-1);
-    JScrollPane listScroller = new JScrollPane(list);
+    prefabsList = new JList(PrefabManager.shared().getListModel());
+    prefabsList.addListSelectionListener(this);
+    prefabsList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+    prefabsList.setLayoutOrientation(JList.VERTICAL);
+    prefabsList.setVisibleRowCount(-1);
+    JScrollPane listScroller = new JScrollPane(prefabsList);
     prefabsFrame.add(listScroller);
     
     prefabsFrame.setLocation(10, 115);
@@ -144,10 +153,15 @@ public class LevelEditor implements Screen, ActionListener {
   
   @Override
   public void render(float delta) {
+    levelManager.setLookAt(null);
+    levelManager.getPsychicsManager().syncWithEntites();
     camera.position.x = hBar.getValue(); //+ (Gdx.graphics.getWidth() / 2);
     camera.position.y = vBar.getMaximum() - vBar.getValue(); //+ (Gdx.graphics.getHeight() / 2);
     camera.update();
     
+    levelManager.update(delta);
+    levelManager.render();
+    levelManager.getPsychicsManager().renderDebug();
     Gdx.gl.glEnable(GL10.GL_BLEND);
     Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     shapeRenderer.setProjectionMatrix(camera.combined);
@@ -178,9 +192,14 @@ public class LevelEditor implements Screen, ActionListener {
     
     shapeRenderer.end();
     Gdx.gl.glDisable(GL10.GL_BLEND);
-    
+
     tempMouseVector = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
     camera.unproject(tempMouseVector);
+    
+    if (entityBrush != null) {
+      entityBrush.setCenterPosition(Math.round(tempMouseVector.x/GRID_SIZE) * GRID_SIZE, Math.round(tempMouseVector.y/GRID_SIZE)* GRID_SIZE);
+    }
+    
     Core.frame.setTitle("X: "+ Math.round(tempMouseVector.x) + " Y: " + Math.round(tempMouseVector.y));
     //stage.act(delta);
     //stage.draw();
@@ -225,8 +244,73 @@ public class LevelEditor implements Screen, ActionListener {
   }
 
   @Override
-  public void actionPerformed(ActionEvent arg0) {
+  public void actionPerformed(ActionEvent event) {
     prefabsFrame.setVisible(!prefabsFrame.isVisible());
+  }
+
+  @Override
+  public void valueChanged(ListSelectionEvent event) {
+    String prefabName = (String)prefabsList.getSelectedValue();
+    Gdx.app.log(TAG, "Selected prefab: "+prefabName);
+    
+    if (entityBrush != null) {
+      entityBrush.destroy();
+    }
+    
+    entityBrush = levelManager.getEntityManager().build(prefabName);
+  }
+
+  @Override
+  public boolean keyDown(int keycode) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean keyUp(int keycode) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean keyTyped(char character) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    Gdx.app.log(TAG, "Clicked!");
+    
+    String prefabName = (String)prefabsList.getSelectedValue();
+    Gdx.app.log(TAG, "Selected prefab: "+prefabName);
+    
+    entityBrush = levelManager.getEntityManager().build(prefabName);
+    return true;
+  }
+
+  @Override
+  public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean touchDragged(int screenX, int screenY, int pointer) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean mouseMoved(int screenX, int screenY) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean scrolled(int amount) {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }

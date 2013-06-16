@@ -57,4 +57,10 @@ public class SpriteComponent extends Component implements ComponentRenderInterfa
       offsetY = Float.parseFloat((String)map.get("offset-y"));
     }
   }
+
+  @Override
+  public void onRemove() {
+    // TODO Auto-generated method stub
+    
+  }
 }

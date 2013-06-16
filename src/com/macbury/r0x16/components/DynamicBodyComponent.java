@@ -2,6 +2,7 @@ package com.macbury.r0x16.components;
 
 import java.util.Map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -17,6 +18,7 @@ import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 
 public class DynamicBodyComponent extends Component {
+  private static final String TAG = "DynamicBodyComponent";
   private Body body;
   private Fixture fixture;
   private FixtureDef fixtureDef;
@@ -71,12 +73,10 @@ public class DynamicBodyComponent extends Component {
     shape.setAsBox(width, height);
     return shape;
   }
-
-
+  
   public FixtureDef getFixtureDef() {
     return fixtureDef;
   }
-
 
   public void setFixtureDef(FixtureDef fixtureDef) {
     this.fixtureDef = fixtureDef;
@@ -85,6 +85,13 @@ public class DynamicBodyComponent extends Component {
   public Body getBody() {
     // TODO Auto-generated method stub
     return body;
+  }
+
+  @Override
+  public void onRemove() {
+    Gdx.app.log(TAG, "Removing body");
+    Entity owner    = getOwner();
+    owner.getLevel().getPsychicsManager().getWorld().destroyBody(body);
   }
 
 }

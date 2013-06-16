@@ -67,7 +67,7 @@ public class LevelScreen implements Screen {
   public void render(float delta) {
     level.update(delta);
     level.render();
-    
+    level.getPsychicsManager().renderDebug();
     if (Core.DEBUG) {
       renderDebug();
     }

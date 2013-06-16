@@ -44,6 +44,7 @@ public class PsychicsManager {
   private LevelManager level;
   private RayHandler rayHandler;
   private Box2DDebugRenderer debugRender;
+  private boolean enabled = true;
   public PsychicsManager(LevelManager levelManager) {
     Gdx.app.log(TAG, "Initializing new PsychicsManager");
     
@@ -63,6 +64,7 @@ public class PsychicsManager {
   
   private void updateRayCamera() {
     OrthographicCamera camera = level.getCamera();
+    boxCamera.setToOrtho(false, camera.viewportWidth * WORLD_TO_BOX, camera.viewportHeight * WORLD_TO_BOX);
     boxCamera.position.set(camera.position.x * WORLD_TO_BOX, camera.position.y * WORLD_TO_BOX, camera.position.z);
     boxCamera.update();
     
@@ -82,17 +84,20 @@ public class PsychicsManager {
   }
   
   public void update(float delta) {
-    psychAccumulator += delta;
-    while(psychAccumulator > BOX_STEP){
-      world.step(BOX_STEP,BOX_VELOCITY_ITERATIONS,BOX_POSITION_ITERATIONS);
-      psychAccumulator -= BOX_STEP;
+    if (enabled) {
+      psychAccumulator += delta;
+      while(psychAccumulator > BOX_STEP){
+        world.step(BOX_STEP,BOX_VELOCITY_ITERATIONS,BOX_POSITION_ITERATIONS);
+        psychAccumulator -= BOX_STEP;
+      }
+      
+      Iterator<Body> bi = world.getBodies();
+      
+      while (bi.hasNext()){
+        PsychicsManager.updateEntityByBody(bi.next());
+      }
     }
     
-    Iterator<Body> bi = world.getBodies();
-    
-    while (bi.hasNext()){
-      PsychicsManager.updateEntityByBody(bi.next());
-    }
   }
   
   
@@ -107,7 +112,30 @@ public class PsychicsManager {
   public void render() {
     updateRayCamera();
     rayHandler.render();
+  }
+  
+  public void renderDebug() {
+    debugRender.render( getWorld(), boxCamera.combined );
+  }
+
+  public void pause() {
+    this.enabled = false;
+  }
+  
+  // sync box 2d bodies with entities positon
+  public void syncWithEntites() {
+    Iterator<Body> bi = world.getBodies();
     
-    //debugRender.render( getWorld(), boxCamera.combined );
+    while (bi.hasNext()){
+      PsychicsManager.updateBodyByEntity(bi.next());
+    }
+  }
+
+  private static void updateBodyByEntity(Body b) {
+    Entity e = (Entity) b.getUserData();
+    
+    if (e != null) {
+      b.setTransform(e.getCenteredPositionInMeters().x, e.getCenteredPositionInMeters().y, e.getRotation() / MathUtils.radiansToDegrees);
+    }
   }
 }

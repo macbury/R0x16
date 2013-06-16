@@ -40,4 +40,10 @@ public class DebugComponent extends Component implements ComponentRenderInterfac
 
   }
 
+  @Override
+  public void onRemove() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

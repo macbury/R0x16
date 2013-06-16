@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.macbury.r0x16.entities.Component;
+import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
 
 public class PointLightComponent extends Component {
@@ -22,17 +23,19 @@ public class PointLightComponent extends Component {
   private boolean isStatic           = false;
   private float distance             = 10.0f;
   private Color color                = Color.WHITE;
+  private Body body;
+  private PointLight light;
   
   @Override
   public void setup() {
     DynamicBodyComponent component = (DynamicBodyComponent) getOwner().getComponent(DynamicBodyComponent.class);
     RayHandler handler = getOwner().getLevel().getPsychicsManager().getLight();
-    Light light = new PointLight(handler, RAY_COUNT);
+    this.light = new PointLight(handler, RAY_COUNT);
     light.setDistance(distance);
     light.setActive(true);
     light.setStaticLight(isStatic);
 
-    Body body = component.getBody();
+    this.body = component.getBody();
     if (body == null) {
       Gdx.app.error(TAG, "Body cannot be null!");
     }
@@ -62,5 +65,9 @@ public class PointLightComponent extends Component {
     float a = Float.parseFloat((String)map.get("alpha"));
     color   = new Color(r, g, b, a);
   }
-
+  
+  @Override
+  public void onRemove() {
+    light.remove();
+  }
 }

@@ -21,7 +21,7 @@ public abstract class Component {
   public void setOwner(Entity owner) {
     this.owner = owner;
   }
-
+  public abstract void onRemove();
   public abstract void setup();
   public abstract void reset();
   public abstract void configure(Map<String, Object> map);

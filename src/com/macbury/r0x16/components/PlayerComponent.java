@@ -250,4 +250,10 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
   public void setState(State state) {
     this.state = state;
   }
+
+  @Override
+  public void onRemove() {
+    Entity owner    = getOwner();
+    owner.getLevel().getPsychicsManager().getWorld().destroyBody(player);
+  }
 }
