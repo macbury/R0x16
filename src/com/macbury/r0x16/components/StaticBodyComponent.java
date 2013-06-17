@@ -15,10 +15,9 @@ import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 
-public class StaticBodyComponent extends Component {
+public class StaticBodyComponent extends BodyComponent {
   private BodyDef bodyDef;
   private PolygonShape shape;
-  private Body body;
   private FixtureDef fixtureDef;
   public StaticBodyComponent() {
     bodyDef = new BodyDef();
@@ -53,11 +52,5 @@ public class StaticBodyComponent extends Component {
   @Override
   public void configure(Map<String, Object> map) {
     fixtureDef = ResourceManager.shared().getFixtureDef((String)map.get("material"));
-  }
-
-  @Override
-  public void onRemove() {
-    Entity owner    = getOwner();
-    owner.getLevel().getPsychicsManager().getWorld().destroyBody(body);
   }
 }

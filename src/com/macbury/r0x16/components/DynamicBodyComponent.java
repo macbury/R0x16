@@ -17,9 +17,8 @@ import com.macbury.r0x16.entities.Entity;
 import com.macbury.r0x16.manager.PsychicsManager;
 import com.macbury.r0x16.manager.ResourceManager;
 
-public class DynamicBodyComponent extends Component {
+public class DynamicBodyComponent extends BodyComponent {
   private static final String TAG = "DynamicBodyComponent";
-  private Body body;
   private Fixture fixture;
   private FixtureDef fixtureDef;
   
@@ -82,16 +81,5 @@ public class DynamicBodyComponent extends Component {
     this.fixtureDef = fixtureDef;
   }
 
-  public Body getBody() {
-    // TODO Auto-generated method stub
-    return body;
-  }
-
-  @Override
-  public void onRemove() {
-    Gdx.app.log(TAG, "Removing body");
-    Entity owner    = getOwner();
-    owner.getLevel().getPsychicsManager().getWorld().destroyBody(body);
-  }
 
 }

@@ -28,7 +28,7 @@ public class PointLightComponent extends Component {
   
   @Override
   public void setup() {
-    DynamicBodyComponent component = (DynamicBodyComponent) getOwner().getComponent(DynamicBodyComponent.class);
+    BodyComponent component = (BodyComponent) getOwner().getComponent(BodyComponent.class);
     RayHandler handler = getOwner().getLevel().getPsychicsManager().getLight();
     this.light = new PointLight(handler, RAY_COUNT);
     light.setDistance(distance);
@@ -41,8 +41,8 @@ public class PointLightComponent extends Component {
     }
     light.attachToBody(body, 0, 0f);
     light.setColor(color);
-   // light.setSoft(true);
-    //light.setSoftnessLenght(1.0f);
+    light.setSoft(true);
+    light.setSoftnessLenght(1.0f);
     Filter filter = new Filter();
     filter.categoryBits = PsychicsManager.FILTER_CATEGORY_LIGHT;
     filter.maskBits     = PsychicsManager.FILTER_MASK_LIGHT;

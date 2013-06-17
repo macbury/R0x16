@@ -16,9 +16,7 @@ public class LevelScreen implements Screen {
   LevelManager level;
   
   public LevelScreen() {
-    
-    //
-    level      = new LevelManager("test.level");
+    level      = new LevelManager();
     for (int i = 0; i < 20; i++) {
       Entity e   = level.getEntityManager().build("GROUND");
       e.getPosition().x = 64 * i;

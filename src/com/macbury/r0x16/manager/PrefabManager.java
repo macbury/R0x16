@@ -130,6 +130,7 @@ public class PrefabManager {
     DefaultListModel listModel = new DefaultListModel();
     
     for (String key : prefabs.keySet()) {
+      //Gdx.app.log(TAG, "Key"+key);
       listModel.addElement(key);
     }
     

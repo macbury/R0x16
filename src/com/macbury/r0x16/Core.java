@@ -4,6 +4,8 @@ import java.awt.Cursor;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.IntBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -21,24 +23,28 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl.LwjglCanvas;
 import com.badlogic.gdx.backends.lwjgl.LwjglFrame;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.macbury.r0x16.game_editor.LevelEditorFrame;
 import com.macbury.r0x16.manager.PrefabManager;
 import com.macbury.r0x16.manager.ResourceManager;
 import com.macbury.r0x16.screens.CodeEditorTest;
 import com.macbury.r0x16.screens.LevelEditor;
 import com.macbury.r0x16.screens.LevelScreen;
 import com.macbury.r0x16.screens.LightTestScreen;
+import com.macbury.r0x16.utils.PowerFrame;
 
 public class Core extends Game {
   public static LwjglFrame frame;
   public static boolean DEBUG              = true;
   public final static String CURSOR_NORMAL = "CURSOR_ARROW";
   public final static String CURSOR_TEXT   = "CURSOR_SELECT";
+  private static final String TAG          = "Core";
   static Core _shared;
   static org.lwjgl.input.Cursor emptyCursor;
   
@@ -48,6 +54,8 @@ public class Core extends Game {
   
   boolean hwVisible            = false;
   private String currentCursor = CURSOR_NORMAL;
+  private LwjglApplicationConfiguration config;
+  private List<String> argsList;
   
 
   public static Core shared() {
@@ -112,21 +120,40 @@ public class Core extends Game {
     this.currentCursor = currentCursor;
   }
 
-  public void bootstrap(LwjglFrame app, String[] args) {
-    Core.frame = app;
-    app.setResizable(false);
-    app.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    app.addWindowListener(new WindowEventHandler());
-    //Core.frame.setCursor(Cursor.getPredefinedCursor(Cursor.));
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch (ClassNotFoundException | InstantiationException
-        | IllegalAccessException | UnsupportedLookAndFeelException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+  public void bootstrap(String[] args) {
+    this.config = new LwjglApplicationConfiguration();
+    config.title     = "R0x16";
+    config.useGL20   = true;
+    config.width     = 1366;
+    config.height    = 768;
+    config.resizable = false;
+    config.samples   = 0;
+    config.vSyncEnabled = true;
+    config.fullscreen = false;
+    
+    this.argsList = Arrays.asList(args);
+    if (argsList.contains("--editor")) {
+      bootAsEditor(config);
+    } else {
+      bootAsGame(config);
+      //Core.frame = new LwjglFrame(Core.shared(), config);
     }
+    //Core.frame.setResizable(false);
+    //Core.frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    //Core.frame.addWindowListener(new WindowEventHandler());
+    //Core.frame.setCursor(Cursor.getPredefinedCursor(Cursor.));
+    
   }
   
+  private void bootAsEditor(LwjglApplicationConfiguration config) {
+    LevelEditorFrame app = new LevelEditorFrame(config);
+    app.setVisible(true);
+  }
+
+  private void bootAsGame(LwjglApplicationConfiguration config) {
+    LwjglApplication app = new LwjglApplication(Core.shared(), config);
+  }
+
   class WindowEventHandler extends WindowAdapter {
     public void windowClosing(WindowEvent evt) {
       Gdx.app.exit();
@@ -147,7 +174,9 @@ public class Core extends Game {
     camera      = new OrthographicCamera();
     xHotspot    = 5;
     yHotspot    = 32;
-    setScreen(new LevelEditor());
+    //setScreen(new LevelScreen());
+    
+    
   }
   
 }
