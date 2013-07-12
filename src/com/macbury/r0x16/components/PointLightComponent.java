@@ -19,7 +19,7 @@ import com.macbury.r0x16.manager.PsychicsManager;
 
 public class PointLightComponent extends Component {
   private static final String TAG    = "PointLightComponent";
-  private static final int RAY_COUNT = 32;
+  private static final int RAY_COUNT = 64;
   private boolean isStatic           = false;
   private float distance             = 10.0f;
   private Color color                = Color.WHITE;
@@ -44,8 +44,8 @@ public class PointLightComponent extends Component {
     light.setSoft(true);
     light.setSoftnessLenght(1.0f);
     Filter filter = new Filter();
-    filter.categoryBits = PsychicsManager.FILTER_CATEGORY_LIGHT;
-    filter.maskBits     = PsychicsManager.FILTER_MASK_LIGHT;
+    filter.categoryBits = PsychicsManager.FILTER_CATEGORY_DONT_ABSORB_LIGHT;
+    filter.maskBits     = PsychicsManager.FILTER_MASK_DONT_ABSORB_LIGHT;
     light.setContactFilter(filter);
   }
 

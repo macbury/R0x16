@@ -195,7 +195,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     FixtureDef fixDef          = new FixtureDef();
     fixDef.shape               = poly;
     fixDef.density             = playerWeight;
-    fixDef.filter.categoryBits = PsychicsManager.FILTER_CATEGORY_PLAYER;
+    fixDef.filter.categoryBits = PsychicsManager.FILTER_CATEGORY_DONT_ABSORB_LIGHT;
     playerPhysicsFixture       = box.createFixture(fixDef);
     poly.dispose();     
  
@@ -207,7 +207,7 @@ public class PlayerComponent extends Component implements ComponentUpdateInterfa
     fixDef                     = new FixtureDef();
     fixDef.shape               = circle;
     fixDef.density             = 0.0f;
-    fixDef.filter.categoryBits = PsychicsManager.FILTER_CATEGORY_PLAYER;
+    fixDef.filter.categoryBits = PsychicsManager.FILTER_CATEGORY_DONT_ABSORB_LIGHT;
     playerSensorFixture        = box.createFixture(fixDef);   
     circle.dispose();
  

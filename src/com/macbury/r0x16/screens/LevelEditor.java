@@ -69,6 +69,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Tree.Node;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.macbury.r0x16.Core;
 import com.macbury.r0x16.entities.Entity;
+import com.macbury.r0x16.game_editor.LevelEditorFrame;
 import com.macbury.r0x16.manager.LevelManager;
 import com.macbury.r0x16.manager.PrefabManager;
 import com.macbury.r0x16.manager.ResourceManager;
@@ -85,8 +86,10 @@ public class LevelEditor implements Screen, InputProcessor {
   
   private Entity entityBrush;
   private Vector3 tempMouseVector;
+  private LevelEditorFrame levelEditorFrame;
   
-  public LevelEditor() {
+  public LevelEditor(LevelEditorFrame levelEditorFrame) {
+    this.levelEditorFrame      = levelEditorFrame;
     stage                      = new Stage(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     Skin skin                  = ResourceManager.shared().getMainSkin();
     Gdx.input.setInputProcessor(this);
@@ -108,8 +111,11 @@ public class LevelEditor implements Screen, InputProcessor {
   public void render(float delta) {
     levelManager.setLookAt(null);
     levelManager.getPsychicsManager().syncWithEntites();
-    //camera.position.x = hBar.getValue(); //+ (Gdx.graphics.getWidth() / 2);
-    //camera.position.y = vBar.getMaximum() - vBar.getValue(); //+ (Gdx.graphics.getHeight() / 2);
+    levelEditorFrame.hBar.setMaximum((int) levelManager.getSize().getWidth());
+    levelEditorFrame.vBar.setMaximum((int) levelManager.getSize().getHeight());
+    
+    camera.position.x = levelEditorFrame.hBar.getValue(); //+ (Gdx.graphics.getWidth() / 2);
+    camera.position.y = levelEditorFrame.vBar.getMaximum() - levelEditorFrame.vBar.getValue(); //+ (Gdx.graphics.getHeight() / 2);
     camera.update();
     
     levelManager.update(delta);
@@ -196,7 +202,7 @@ public class LevelEditor implements Screen, InputProcessor {
 
   }
 
-  private void saveMap() {
+  public void saveMap() {
     if (levelManager.getName() != null) {
       levelManager.save();
     } else {
@@ -212,7 +218,7 @@ public class LevelEditor implements Screen, InputProcessor {
     }
   }
 
-  private void newMap() {
+  public void newMap() {
     entityBrush                = null;
     levelManager               = new LevelManager();
     levelManager.getPsychicsManager().pause();
@@ -241,10 +247,12 @@ public class LevelEditor implements Screen, InputProcessor {
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     Gdx.app.log(TAG, "Clicked!");
     
-    //String prefabName = (String)prefabsList.getSelectedValue();
-   // Gdx.app.log(TAG, "Selected prefab: "+prefabName);
+    String prefabName = levelEditorFrame.prefabsList.getSelectedValue();
+    Gdx.app.log(TAG, "Selected prefab: "+prefabName);
+    if (prefabName != null) {
+      entityBrush = levelManager.getEntityManager().build(prefabName);
+    }
     
-  //  entityBrush = levelManager.getEntityManager().build(prefabName);
     return true;
   }
 
@@ -272,4 +280,11 @@ public class LevelEditor implements Screen, InputProcessor {
     return false;
   }
   
+  public void setBrush(String prefab) {
+    if (entityBrush != null) {
+      entityBrush.destroy();
+    } 
+    
+    entityBrush = levelManager.getEntityManager().build(prefab);
+  }
 }

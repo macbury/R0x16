@@ -27,7 +27,7 @@
   <prefab id="REFLECTOR">
     <component type="SpriteComponent"          atlas="DEVELOPER_ATLAS" region="lamp" />
     <component type="StaticBodyComponent"      material="GROUND" />
-    <component type="PointLightComponent"      static="true" distance="90" red="1.0" green="1.0" blue="1.0" alpha="0.7" />
+    <component type="PointLightComponent"      static="true" distance="90" red="1.0" green="1.0" blue="1.0" alpha="0.5" />
   </prefab>
 
   <prefab id="CUBE">
@@ -41,7 +41,7 @@
   </prefab>
   
   <prefab id="GROUND">
-    <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="devTrans" />
+    <component type="SpriteComponent"      atlas="DEVELOPER_ATLAS" region="panel" />
     <component type="StaticBodyComponent"  material="GROUND" />
   </prefab>
 </prefabs>

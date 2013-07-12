@@ -136,7 +136,7 @@ public class CodeEditor extends Widget {
       public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         super.enter(event, x, y, pointer, fromActor);
         if (pointer == -1) {
-          Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
+          //Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
         }
       }
 
@@ -144,7 +144,7 @@ public class CodeEditor extends Widget {
       public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
         super.exit(event, x, y, pointer, toActor);
         if (pointer == -1) {
-          Core.shared().setCurrentCursor(Core.CURSOR_NORMAL);
+          //Core.shared().setCurrentCursor(Core.CURSOR_NORMAL);
         }
       }
 
@@ -156,7 +156,7 @@ public class CodeEditor extends Widget {
         caret.setCursorPosition(xToCol(x) + caret.getColScrollPosition(), yToRow(y) + caret.getRowScrollPosition());
         Stage stage = getStage();
         if (stage != null) stage.setKeyboardFocus(CodeEditor.this);
-        Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
+        //Core.shared().setCurrentCursor(Core.CURSOR_TEXT);
         return true;
       }
       

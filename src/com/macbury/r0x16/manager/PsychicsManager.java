@@ -25,11 +25,11 @@ import com.macbury.r0x16.entities.Entity;
 public class PsychicsManager {
   public final static short FILTER_CATEGORY_SCENERY  = 0x0001;
   public final static short FILTER_CATEGORY_LIGHT    = 0x0002; //LIGHT PASS THROUGH
-  public static final short FILTER_CATEGORY_PLAYER   = 0x0004;
+  public static final short FILTER_CATEGORY_DONT_ABSORB_LIGHT   = 0x0004;
   public static final short FILTER_CATEGORY_LIGHT_PASS = 0x0008;
   public final static short FILTER_MASK_SCENERY      = -1;
-  public final static short FILTER_MASK_PLAYER       = FILTER_CATEGORY_SCENERY | FILTER_CATEGORY_LIGHT;
-  public final static short FILTER_MASK_LIGHT        = FILTER_CATEGORY_SCENERY;
+  public final static short FILTER_MASK_DONT_ABSORB_LIGHT = FILTER_CATEGORY_SCENERY | FILTER_CATEGORY_LIGHT;
+  public final static short FILTER_MASK_ABSORB_LIGHT      = FILTER_CATEGORY_SCENERY;
   
   private OrthographicCamera boxCamera;
   private World world;
@@ -55,7 +55,7 @@ public class PsychicsManager {
     world         = new World(new Vector2(0, GRAVITY),true);
     //Gdx.app.log(TAG, "Setting lights FBO: "+Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
     rayHandler    = new RayHandler(world);
-    rayHandler.setAmbientLight(0.0f,0.0f,0.0f,0.1f);
+    rayHandler.setAmbientLight(0.0f,0.0f,0.0f,0.6f);
     OrthographicCamera camera = level.getCamera();
     boxCamera     = new OrthographicCamera();
     boxCamera.setToOrtho(false, camera.viewportWidth * WORLD_TO_BOX, camera.viewportHeight * WORLD_TO_BOX);

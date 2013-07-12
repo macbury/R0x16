@@ -22,7 +22,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
@@ -45,12 +47,17 @@ public class LevelEditorFrame extends JFrame implements ActionListener, ListSele
   private static final String TAG             = "LevelEditor";
   private static final String NEW_MAP_ACTION  = "New map";
   private static final String SAVE_MAP_ACTION = "Save map";
+  private static final String OPEN_MAP_ACTION = "Open map";
+  private static final String DRAW_ACTION     = "Draw";
+  private static final String SELECT_ACTION   = "Select";
+  private static final String CONFIG_ACTION   = "Configure";
+  private static final String RUN_ACTION      = "Play";
   private LwjglCanvas lwjglCanvas;
-  private JList<String> prefabsList;
-  private JScrollBar vBar;
-  private JScrollBar hBar;
+  public JList<String> prefabsList;
+  public JScrollBar vBar;
+  public JScrollBar hBar;
   private JScrollPane listScroller;
-  private Screen levelEditor;
+  private LevelEditor levelEditor;
   public LevelEditorFrame(LwjglApplicationConfiguration config) {
     super("Game Editor");
     try {
@@ -68,8 +75,40 @@ public class LevelEditorFrame extends JFrame implements ActionListener, ListSele
   private void addToolbar() {
     JToolBar toolBar = new JToolBar("Tools");
     toolBar.add(makeToolbarButton("document-new", NEW_MAP_ACTION, NEW_MAP_ACTION, NEW_MAP_ACTION));
+    toolBar.add(makeToolbarButton("document-open", OPEN_MAP_ACTION, OPEN_MAP_ACTION, OPEN_MAP_ACTION));
     toolBar.add(makeToolbarButton("document-save", SAVE_MAP_ACTION, SAVE_MAP_ACTION, SAVE_MAP_ACTION));
+    toolBar.addSeparator();
+    toolBar.add(makeToolbarToggleButton("draw", DRAW_ACTION, DRAW_ACTION, DRAW_ACTION));
+    toolBar.add(makeToolbarToggleButton("select", SELECT_ACTION, SELECT_ACTION, SELECT_ACTION));
+    toolBar.addSeparator();
+    toolBar.add(makeToolbarToggleButton("system-run", CONFIG_ACTION, CONFIG_ACTION, CONFIG_ACTION));
+    toolBar.addSeparator();
+    toolBar.add(makeToolbarToggleButton("play", RUN_ACTION, RUN_ACTION, RUN_ACTION));
     this.add(toolBar, BorderLayout.NORTH);
+  }
+  
+  protected JToggleButton makeToolbarToggleButton(String imageName, String actionCommand, String toolTipText, String altText) {
+    URL imageURL = null;
+    try {
+      imageURL = Gdx.files.internal("assets/editor/"+imageName+".png").file().toURL();
+    } catch (MalformedURLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    //Create and initialize the button.
+    JToggleButton button = new JToggleButton();
+    button.setActionCommand(actionCommand);
+    button.setToolTipText(toolTipText);
+    button.addActionListener(this);
+    
+    if (imageURL != null) {                      //image found
+      button.setIcon(new ImageIcon(imageURL, altText));
+    } else {                                     //no image found
+      button.setText(altText);
+    }
+    
+    return button;
   }
   
   protected JButton makeToolbarButton(String imageName, String actionCommand, String toolTipText, String altText) {
@@ -114,8 +153,16 @@ public class LevelEditorFrame extends JFrame implements ActionListener, ListSele
 
   @Override
   public void actionPerformed(ActionEvent ev) {
-    // TODO Auto-generated method stub
-    
+    switch (ev.getActionCommand()) {
+    case SAVE_MAP_ACTION:
+      levelEditor.saveMap();
+    break;
+    case NEW_MAP_ACTION:
+      levelEditor.newMap();
+    break;
+    default:
+      break;
+    }
   }
   
   protected void exception (Throwable ex) {
@@ -216,7 +263,7 @@ public class LevelEditorFrame extends JFrame implements ActionListener, ListSele
   }
 
   protected void start() {
-    levelEditor = new LevelEditor();
+    levelEditor = new LevelEditor(this);
     Core.shared().setScreen(levelEditor);
     prefabsList.setModel(PrefabManager.shared().getListModel());
   }
@@ -226,8 +273,8 @@ public class LevelEditorFrame extends JFrame implements ActionListener, ListSele
 
   @Override
   public void valueChanged(ListSelectionEvent arg0) {
-    // TODO Auto-generated method stub
-    
+    String val = prefabsList.getSelectedValue();
+    levelEditor.setBrush(val);
   }
 
 }

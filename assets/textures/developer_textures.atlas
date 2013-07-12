@@ -5,63 +5,70 @@ filter: Nearest,Nearest
 repeat: none
 ball
   rotate: false
-  xy: 1, 167
+  xy: 1, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devBlue
   rotate: false
-  xy: 1, 101
+  xy: 67, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devGray
   rotate: false
-  xy: 67, 167
+  xy: 133, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devGreen
   rotate: false
-  xy: 1, 35
+  xy: 199, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devLightGray
   rotate: false
-  xy: 67, 101
+  xy: 265, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devOrange
   rotate: false
-  xy: 133, 167
+  xy: 331, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devRed
   rotate: false
-  xy: 67, 35
+  xy: 397, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devTrans
   rotate: false
-  xy: 133, 101
+  xy: 463, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 devYellow
   rotate: false
-  xy: 133, 35
+  xy: 529, 35
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+panel
+  rotate: false
+  xy: 595, 35
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
